@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeadlineOS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050609;
+      --card: #10141E;
+      --elevated: #161B29;
+      --violet: #A855F7;
+      --cyan: #00E5FF;
+      --text: #F5F7FF;
+      --text-sub: #929AAF;
+      --success: #35F2A0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    header {
+      width: 100%;
+      max-width: 600px;
+      margin-top: 20px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 1px;
+    }
+    h1 span { color: var(--cyan); }
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.08);
+    }
+    .hero-card {
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      box-shadow: 0 0 25px rgba(0, 229, 255, 0.15);
+    }
+    .card-tag {
+      color: var(--cyan);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .card-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+    }
+    .timer-display {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3.5rem;
+      text-align: center;
+      color: var(--cyan);
+      margin: 20px 0;
+      letter-spacing: 2px;
+    }
+    .btn {
+      background: var(--violet);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: 'Sora', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: var(--elevated);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      background: var(--elevated);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>DEADLINE<span>OS</span></h1>
+    <p style="color: var(--text-sub); font-size: 0.9rem;">Futuristic Task Control</p>
+  </header>
+
+  <div class="card hero-card">
+    <div class="card-tag">Do This Next</div>
+    <div class="card-title" id="next-task">No assignments added yet</div>
+    <p id="next-desc" style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 16px;">Add an assignment below to initialize your schedule.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-tag" style="color: var(--violet);">Focus Mode</div>
+    <div class="timer-display" id="timer">25:00</div>
+    <button class="btn" onclick="toggleTimer()" id="timer-btn">Start Session</button>
+  </div>
+
+  <div class="card">
+    <div class="card-tag">Add Assignment</div>
+    <input type="text" id="task-input" placeholder="Assignment Title (e.g. Math Homework)">
+    <button class="btn btn-secondary" onclick="addTask()">Save Assignment</button>
+  </div>
+
+  <script>
+    let assignments = JSON.parse(localStorage.getItem('deadlineos_tasks') || '[]');
+    let timerInterval = null;
+    let timeLeft = 25 * 60;
+    let isRunning = false;
+
+    function render() {
+      const nextTaskEl = document.getElementById('next-task');
+      const nextDescEl = document.getElementById('next-desc');
+      
+      if (assignments.length > 0) {
+        nextTaskEl.textContent = assignments[0];
+        nextDescEl.textContent = 'Recommended action item based on queue priority.';
+      } else {
+        nextTaskEl.textContent = 'No assignments added yet';
+        nextDescEl.textContent = 'Add an assignment below to initialize your schedule.';
+      }
+    }
+
+    function addTask() {
+      const input = document.getElementById('task-input');
+      if (input.value.trim() !== '') {
+        assignments.push(input.value.trim());
+        localStorage.setItem('deadlineos_tasks', JSON.stringify(assignments));
+        input.value = '';
+        render();
+      }
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('timer-btn');
+      if (isRunning) {
+        clearInterval(timerInterval);
+        btn.textContent = 'Resume Session';
+        isRunning = false;
+      } else {
+        isRunning = true;
+        btn.textContent = 'Pause Session';
+        timerInterval = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            alert('Session Complete!');
+            isRunning = false;
+            btn.textContent = 'Start Session';
+            timeLeft = 25 * 60;
+            updateTimerDisplay();
+          }
+        }, 1000);
+      }
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const secs = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById('timer').textContent = `${mins}:${secs}`;
+    }
+
+    render();
+  </script>
+
+</body>
+</html>
