@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DeadlineOS Ultimate — Gamified Productivity</title>
+  <title>DeadlineOS Ultimate — Cinematic Edition</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,6 +29,31 @@
           fontFamily: {
             sans: ['Sora', 'sans-serif'],
             display: ['Space Grotesk', 'sans-serif']
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'modal-pop': 'modalPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'pulse-glow-cyan': 'pulseGlowCyan 2s infinite alternate',
+            'pulse-glow-violet': 'pulseGlowViolet 2s infinite alternate',
+            'spin-slow': 'spin 8s linear infinite',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: 0, transform: 'translateY(20px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' },
+            },
+            modalPop: {
+              '0%': { opacity: 0, transform: 'scale(0.95) translateY(10px)' },
+              '100%': { opacity: 1, transform: 'scale(1) translateY(0)' },
+            },
+            pulseGlowCyan: {
+              '0%': { boxShadow: '0 0 15px rgba(0, 240, 255, 0.2)' },
+              '100%': { boxShadow: '0 0 35px rgba(0, 240, 255, 0.6)' },
+            },
+            pulseGlowViolet: {
+              '0%': { boxShadow: '0 0 15px rgba(184, 41, 255, 0.2)' },
+              '100%': { boxShadow: '0 0 35px rgba(184, 41, 255, 0.6)' },
+            }
           }
         }
       }
@@ -54,123 +79,123 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
     }
-    .glow-cyan { box-shadow: 0 0 30px rgba(0, 240, 255, 0.15); border-color: rgba(0, 240, 255, 0.4); }
-    .glow-violet { box-shadow: 0 0 30px rgba(184, 41, 255, 0.15); border-color: rgba(184, 41, 255, 0.4); }
+    .glass-panel:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+    
     .progress-ring__circle {
-      transition: stroke-dashoffset 0.35s;
+      transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       transform: rotate(-90deg);
       transform-origin: 50% 50%;
     }
+    
     /* XP Bar Animation */
-    #xp-fill { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+    #xp-fill { transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
+    
+    /* Hide elements initially for fade-in */
+    .stagger-item { opacity: 0; }
   </style>
 </head>
 <body class="relative flex flex-col items-center">
 
-  <!-- Interactive Particle Background -->
   <canvas id="particle-canvas"></canvas>
 
-  <!-- HEADER NAVIGATION & GAMIFICATION -->
-  <header class="w-full max-w-6xl px-6 pt-6 pb-4 flex flex-col md:flex-row justify-between items-center gap-4 z-10">
+  <header class="w-full max-w-6xl px-6 pt-6 pb-4 flex flex-col md:flex-row justify-between items-center gap-4 z-10 animate-fade-in-up">
     <div class="flex items-center gap-4 w-full md:w-auto">
-      <div class="relative w-10 h-10 flex items-center justify-center rounded-xl bg-elevatedDark border border-neonCyan/50 shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+      <div class="relative w-10 h-10 flex items-center justify-center rounded-xl bg-elevatedDark border border-neonCyan/50 animate-pulse-glow-cyan hover:rotate-90 transition-transform duration-500">
         <i data-lucide="cpu" class="w-6 h-6 text-neonCyan"></i>
       </div>
       <div>
         <span class="font-display font-bold text-2xl tracking-wider">DEADLINE<span class="text-neonCyan">OS</span></span>
-        
-        <!-- Gamification XP Bar -->
         <div class="flex items-center gap-2 mt-1">
           <span class="text-[10px] font-bold text-neonViolet uppercase tracking-wider">Lvl <span id="player-level">1</span></span>
           <div class="w-32 h-1.5 bg-elevatedDark rounded-full overflow-hidden">
             <div id="xp-fill" class="h-full bg-gradient-to-r from-neonViolet to-neonCyan" style="width: 0%"></div>
           </div>
-          <span class="text-[10px] text-textSecondary"><span id="player-xp">0</span> / <span id="player-next-xp">100</span> XP</span>
         </div>
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
     <nav class="flex glass-panel p-1.5 rounded-2xl w-full md:w-auto overflow-x-auto">
-      <button onclick="switchTab('home')" id="tab-home" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 bg-neonViolet text-white whitespace-nowrap">
+      <button onclick="switchTab('home')" id="tab-home" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 bg-neonViolet text-white transition-all duration-300 hover:scale-105">
         <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Home</span>
       </button>
-      <button onclick="switchTab('assignments')" id="tab-assignments" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-textSecondary hover:text-textPrimary whitespace-nowrap">
+      <button onclick="switchTab('assignments')" id="tab-assignments" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-textSecondary hover:text-textPrimary transition-all duration-300 hover:scale-105">
         <i data-lucide="layers" class="w-4 h-4"></i><span>Tasks</span>
       </button>
-      <button onclick="switchTab('focus')" id="tab-focus" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-textSecondary hover:text-textPrimary whitespace-nowrap">
+      <button onclick="switchTab('focus')" id="tab-focus" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-textSecondary hover:text-textPrimary transition-all duration-300 hover:scale-105">
         <i data-lucide="crosshair" class="w-4 h-4"></i><span>Focus Flow</span>
       </button>
-      <button onclick="switchTab('stats')" id="tab-stats" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-textSecondary hover:text-textPrimary whitespace-nowrap">
+      <button onclick="switchTab('stats')" id="tab-stats" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-textSecondary hover:text-textPrimary transition-all duration-300 hover:scale-105">
         <i data-lucide="activity" class="w-4 h-4"></i><span>Telemetry</span>
       </button>
     </nav>
   </header>
 
-  <!-- MAIN APPLICATION CONTAINER -->
   <main class="w-full max-w-6xl px-6 py-4 z-10 flex-1 w-full">
 
     <!-- PAGE 1: HOME -->
     <section id="page-home" class="space-y-6">
-      <div class="glass-panel p-6 rounded-2xl glow-cyan relative overflow-hidden">
-        <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-          <i data-lucide="target" class="w-32 h-32"></i>
+      <div class="glass-panel p-6 rounded-2xl border-neonCyan/40 animate-pulse-glow-cyan relative overflow-hidden animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div class="absolute -top-10 -right-10 p-4 opacity-5 pointer-events-none animate-spin-slow">
+          <i data-lucide="target" class="w-64 h-64"></i>
         </div>
         
         <div class="flex justify-between items-start mb-4 relative z-10">
           <span class="text-xs font-bold uppercase tracking-widest text-neonCyan flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-neonCyan animate-pulse"></span> Primary Objective
+            <span class="w-2 h-2 rounded-full bg-neonCyan animate-ping"></span> Primary Objective
           </span>
-          <span id="next-subject" class="text-xs px-3 py-1 rounded-lg bg-bgDark border border-neonCyan/20 text-neonCyan font-bold">--</span>
+          <span id="next-subject" class="text-xs px-3 py-1 rounded-lg bg-bgDark border border-neonCyan/20 text-neonCyan font-bold transition-all">--</span>
         </div>
 
-        <h2 id="next-title" class="font-display text-3xl font-bold mb-2 relative z-10">Systems Standby</h2>
+        <h2 id="next-title" class="font-display text-4xl font-bold mb-2 relative z-10 tracking-tight">Systems Standby</h2>
         <p id="next-reason" class="text-textSecondary text-sm mb-6 relative z-10">Queue tasks to initiate priority algorithms.</p>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 relative z-10">
-          <div class="bg-bgDark/50 p-3 rounded-xl border border-white/5">
+          <div class="bg-bgDark/50 p-4 rounded-xl border border-white/5 hover:bg-elevatedDark transition-colors">
             <div class="text-[10px] text-textSecondary uppercase tracking-wider mb-1">Status</div>
-            <div id="next-countdown" class="font-display text-sm font-bold text-textPrimary">--</div>
+            <div id="next-countdown" class="font-display text-lg font-bold text-textPrimary">--</div>
           </div>
-          <div class="bg-bgDark/50 p-3 rounded-xl border border-white/5">
+          <div class="bg-bgDark/50 p-4 rounded-xl border border-white/5 hover:bg-elevatedDark transition-colors">
             <div class="text-[10px] text-textSecondary uppercase tracking-wider mb-1">Workload</div>
-            <div id="next-duration" class="font-display text-sm font-bold text-textPrimary">--</div>
+            <div id="next-duration" class="font-display text-lg font-bold text-textPrimary">--</div>
           </div>
-          <div class="bg-bgDark/50 p-3 rounded-xl border border-white/5">
+          <div class="bg-bgDark/50 p-4 rounded-xl border border-white/5 hover:bg-elevatedDark transition-colors">
             <div class="text-[10px] text-textSecondary uppercase tracking-wider mb-1">Due Date</div>
-            <div id="next-duedate" class="font-display text-sm font-bold text-textPrimary">--</div>
+            <div id="next-duedate" class="font-display text-lg font-bold text-textPrimary">--</div>
           </div>
-          <div class="bg-bgDark/50 p-3 rounded-xl border border-white/5">
+          <div class="bg-bgDark/50 p-4 rounded-xl border border-white/5 hover:bg-elevatedDark transition-colors group">
             <div class="text-[10px] text-textSecondary uppercase tracking-wider mb-1">Reward</div>
-            <div class="font-display text-sm font-bold text-neonViolet">+50 XP</div>
+            <div class="font-display text-lg font-bold text-neonViolet group-hover:scale-110 transition-transform origin-left">+50 XP</div>
           </div>
         </div>
 
-        <button onclick="startFocusOnTopTask()" id="start-focus-btn" disabled class="w-full py-4 rounded-xl bg-neonViolet/90 opacity-50 cursor-not-allowed text-white font-bold tracking-wide flex items-center justify-center gap-2 hover:bg-neonViolet transition shadow-[0_0_20px_rgba(184,41,255,0.4)] relative z-10">
-          <i data-lucide="power" class="w-5 h-5"></i>
-          <span>ENGAGE DEEP WORK</span>
+        <button onclick="startFocusOnTopTask()" id="start-focus-btn" disabled class="w-full py-4 rounded-xl bg-neonViolet opacity-50 cursor-not-allowed text-white font-bold tracking-wide flex items-center justify-center gap-2 hover:bg-white hover:text-neonViolet transition-all duration-300 relative z-10 group overflow-hidden">
+          <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+          <i data-lucide="power" class="w-5 h-5 relative z-10 group-hover:scale-110 transition-transform"></i>
+          <span class="relative z-10">ENGAGE DEEP WORK</span>
         </button>
       </div>
     </section>
 
     <!-- PAGE 2: ASSIGNMENTS -->
     <section id="page-assignments" class="hidden space-y-6">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 class="font-display text-3xl font-bold">Task Database</h1>
-        </div>
-        <button onclick="toggleModal('add-modal')" class="px-5 py-3 rounded-xl bg-neonCyan text-bgDark font-bold text-sm flex items-center gap-2 hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] transition">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-fade-in-up">
+        <h1 class="font-display text-3xl font-bold">Task Database</h1>
+        <button onclick="toggleModal('add-modal')" class="px-5 py-3 rounded-xl bg-neonCyan text-bgDark font-bold text-sm flex items-center gap-2 hover:scale-105 hover:shadow-[0_0_20px_rgba(0,240,255,0.6)] transition-all duration-300">
           <i data-lucide="plus" class="w-5 h-5"></i> Add Entity
         </button>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div class="sm:col-span-2 relative">
-          <i data-lucide="search" class="w-4 h-4 absolute left-4 top-3.5 text-textSecondary"></i>
-          <input type="text" id="search-input" oninput="renderAssignments()" placeholder="Search parameters..." class="w-full pl-10 pr-4 py-3 rounded-xl glass-panel text-textPrimary placeholder-textSecondary text-sm focus:outline-none focus:border-neonCyan focus:bg-elevatedDark">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div class="sm:col-span-2 relative group">
+          <i data-lucide="search" class="w-4 h-4 absolute left-4 top-3.5 text-textSecondary group-focus-within:text-neonCyan transition-colors"></i>
+          <input type="text" id="search-input" oninput="renderAssignments()" placeholder="Search parameters..." class="w-full pl-10 pr-4 py-3 rounded-xl glass-panel text-textPrimary placeholder-textSecondary text-sm focus:outline-none focus:border-neonCyan transition-all">
         </div>
-        <select id="filter-subject" onchange="renderAssignments()" class="px-4 py-3 rounded-xl glass-panel text-textPrimary text-sm focus:outline-none focus:border-neonCyan">
+        <select id="filter-subject" onchange="renderAssignments()" class="px-4 py-3 rounded-xl glass-panel text-textPrimary text-sm focus:outline-none focus:border-neonCyan transition-all cursor-pointer">
           <option value="ALL">All Categories</option>
         </select>
       </div>
@@ -180,33 +205,32 @@
 
     <!-- PAGE 3: FOCUS FLOW -->
     <section id="page-focus" class="hidden space-y-6">
-      <div class="text-center max-w-md mx-auto mb-4">
+      <div class="text-center max-w-md mx-auto mb-4 animate-fade-in-up">
         <h1 class="font-display text-3xl font-bold">Focus Flow</h1>
         <p id="focus-task-title" class="text-neonCyan font-mono text-sm mt-1">Awaiting Target Selection</p>
       </div>
 
-      <div class="glass-panel p-8 rounded-[2rem] glow-violet flex flex-col items-center justify-center max-w-md mx-auto relative overflow-hidden">
+      <div class="glass-panel p-8 rounded-[2rem] animate-pulse-glow-violet flex flex-col items-center justify-center max-w-md mx-auto relative overflow-hidden animate-fade-in-up" style="animation-delay: 0.1s;">
         
-        <!-- Smart Mode Indicator -->
-        <div id="flow-mode-badge" class="absolute top-6 px-3 py-1 rounded-full bg-neonViolet/20 border border-neonViolet/50 text-[10px] font-bold text-neonViolet uppercase tracking-widest">
+        <div id="flow-mode-badge" class="absolute top-6 px-4 py-1.5 rounded-full bg-neonViolet/20 border border-neonViolet/50 text-[10px] font-bold text-neonViolet uppercase tracking-widest transition-all duration-500">
           Deep Work
         </div>
 
-        <div class="relative w-64 h-64 flex items-center justify-center my-6">
-          <svg class="w-full h-full" viewBox="0 0 100 100">
-            <circle class="text-bgDark" stroke-width="4" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50"/>
-            <circle id="timer-ring" class="progress-ring__circle text-neonViolet" stroke-width="4" stroke-dasharray="282.74" stroke-dashoffset="0" stroke-linecap="round" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50"/>
+        <div class="relative w-64 h-64 flex items-center justify-center my-6 group">
+          <svg class="w-full h-full transform transition-transform duration-700 group-hover:scale-105" viewBox="0 0 100 100">
+            <circle class="text-bgDark" stroke-width="3" stroke="currentColor" fill="transparent" r="46" cx="50" cy="50"/>
+            <circle id="timer-ring" class="progress-ring__circle text-neonViolet" stroke-width="4" stroke-dasharray="289.02" stroke-dashoffset="0" stroke-linecap="round" stroke="currentColor" fill="transparent" r="46" cx="50" cy="50"/>
           </svg>
           <div class="absolute flex flex-col items-center">
-            <span id="timer-display" class="font-display text-6xl font-bold tracking-tighter text-textPrimary">25:00</span>
+            <span id="timer-display" class="font-display text-6xl font-bold tracking-tighter text-textPrimary drop-shadow-lg">25:00</span>
           </div>
         </div>
 
         <div class="flex gap-4 w-full">
-          <button onclick="toggleTimer()" id="timer-control-btn" class="flex-1 py-4 rounded-xl bg-textPrimary text-bgDark font-bold text-sm hover:bg-white transition flex justify-center items-center gap-2">
+          <button onclick="toggleTimer()" id="timer-control-btn" class="flex-1 py-4 rounded-xl bg-textPrimary text-bgDark font-bold text-sm hover:scale-105 hover:bg-neonCyan transition-all duration-300 flex justify-center items-center gap-2">
             <i data-lucide="play" class="w-5 h-5 fill-current"></i> <span id="timer-btn-text">Initiate</span>
           </button>
-          <button onclick="toggleAmbientNoise()" id="ambient-btn" class="p-4 rounded-xl bg-bgDark border border-white/10 hover:border-neonCyan hover:text-neonCyan transition">
+          <button onclick="toggleAmbientNoise()" id="ambient-btn" class="p-4 rounded-xl bg-bgDark border border-white/10 hover:border-neonCyan hover:text-neonCyan hover:scale-105 transition-all duration-300">
             <i data-lucide="headphones" class="w-5 h-5"></i>
           </button>
         </div>
@@ -215,27 +239,27 @@
 
     <!-- PAGE 4: TELEMETRY -->
     <section id="page-stats" class="hidden space-y-6">
-      <h1 class="font-display text-3xl font-bold">System Telemetry</h1>
+      <h1 class="font-display text-3xl font-bold animate-fade-in-up">System Telemetry</h1>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="glass-panel p-6 rounded-2xl border-t-2 border-neonCyan">
+        <div class="glass-panel p-6 rounded-2xl border-t-2 border-neonCyan hover:scale-105 transition-transform duration-300 animate-fade-in-up" style="animation-delay: 0.1s;">
           <div class="text-xs text-textSecondary uppercase tracking-wider mb-2">Total Focus Time</div>
           <div class="flex items-end gap-2">
-            <div id="stat-focus-time" class="font-display text-4xl font-bold text-textPrimary">0</div>
-            <div class="text-neonCyan font-bold mb-1">mins</div>
+            <div id="stat-focus-time" class="font-display text-5xl font-bold text-textPrimary">0</div>
+            <div class="text-neonCyan font-bold mb-2">mins</div>
           </div>
         </div>
-        <div class="glass-panel p-6 rounded-2xl border-t-2 border-neonViolet">
+        <div class="glass-panel p-6 rounded-2xl border-t-2 border-neonViolet hover:scale-105 transition-transform duration-300 animate-fade-in-up" style="animation-delay: 0.2s;">
           <div class="text-xs text-textSecondary uppercase tracking-wider mb-2">Tasks Liquidated</div>
           <div class="flex items-end gap-2">
-            <div id="stat-completed-count" class="font-display text-4xl font-bold text-textPrimary">0</div>
-            <div class="text-neonViolet font-bold mb-1">units</div>
+            <div id="stat-completed-count" class="font-display text-5xl font-bold text-textPrimary">0</div>
+            <div class="text-neonViolet font-bold mb-2">units</div>
           </div>
         </div>
-        <div class="glass-panel p-6 rounded-2xl border-t-2 border-neonGreen">
+        <div class="glass-panel p-6 rounded-2xl border-t-2 border-neonGreen hover:scale-105 transition-transform duration-300 animate-fade-in-up" style="animation-delay: 0.3s;">
           <div class="text-xs text-textSecondary uppercase tracking-wider mb-2">Total XP Earned</div>
           <div class="flex items-end gap-2">
-            <div id="stat-total-xp" class="font-display text-4xl font-bold text-textPrimary">0</div>
-            <div class="text-neonGreen font-bold mb-1">XP</div>
+            <div id="stat-total-xp" class="font-display text-5xl font-bold text-textPrimary">0</div>
+            <div class="text-neonGreen font-bold mb-2">XP</div>
           </div>
         </div>
       </div>
@@ -243,59 +267,55 @@
   </main>
 
   <!-- ADD ASSIGNMENT MODAL -->
-  <div id="add-modal" class="hidden fixed inset-0 bg-bgDark/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="glass-panel w-full max-w-lg rounded-2xl p-6 space-y-4">
-      <div class="flex justify-between items-center pb-3">
+  <div id="add-modal" class="hidden fixed inset-0 bg-bgDark/80 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 data-[state=open]:opacity-100">
+    <div class="glass-panel w-full max-w-lg rounded-2xl p-6 space-y-4 transform scale-95 data-[state=open]:animate-modal-pop">
+      <div class="flex justify-between items-center pb-3 border-b border-white/5">
         <h3 class="font-display text-xl font-bold">New Entity</h3>
-        <button onclick="toggleModal('add-modal')" class="text-textSecondary hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+        <button onclick="toggleModal('add-modal')" class="text-textSecondary hover:text-white hover:rotate-90 transition-all duration-300"><i data-lucide="x" class="w-6 h-6"></i></button>
       </div>
 
-      <div class="flex bg-bgDark p-1 rounded-xl text-xs font-bold">
-        <button onclick="setAddMode('manual')" id="mode-btn-manual" class="flex-1 py-2.5 rounded-lg bg-neonCyan text-bgDark">Manual</button>
-        <button onclick="setAddMode('ocr')" id="mode-btn-ocr" class="flex-1 py-2.5 rounded-lg text-textSecondary">OCR Scan</button>
+      <div class="flex bg-bgDark p-1 rounded-xl text-xs font-bold border border-white/5">
+        <button onclick="setAddMode('manual')" id="mode-btn-manual" class="flex-1 py-2.5 rounded-lg bg-neonCyan text-bgDark transition-colors">Manual</button>
+        <button onclick="setAddMode('ocr')" id="mode-btn-ocr" class="flex-1 py-2.5 rounded-lg text-textSecondary hover:text-white transition-colors">OCR Scan</button>
       </div>
 
-      <div id="ocr-container" class="hidden p-6 rounded-xl border-2 border-dashed border-neonViolet bg-neonViolet/5 text-center">
-        <i data-lucide="camera" class="w-10 h-10 text-neonViolet mx-auto mb-3"></i>
-        <input type="file" id="ocr-file-input" accept="image/*" onchange="processOCR(event)" class="text-xs text-textSecondary file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-neonViolet file:text-white file:font-bold">
+      <div id="ocr-container" class="hidden p-6 rounded-xl border-2 border-dashed border-neonViolet bg-neonViolet/5 text-center transition-all">
+        <i data-lucide="camera" class="w-10 h-10 text-neonViolet mx-auto mb-3 animate-pulse"></i>
+        <input type="file" id="ocr-file-input" accept="image/*" onchange="processOCR(event)" class="text-xs text-textSecondary file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-neonViolet file:text-white file:font-bold file:cursor-pointer hover:file:opacity-80 file:transition-opacity">
         <div id="ocr-status" class="text-xs font-bold text-neonViolet mt-3 hidden">Analyzing pixels...</div>
       </div>
 
       <form id="assignment-form" onsubmit="handleSaveAssignment(event)" class="space-y-4">
         <div>
-          <input type="text" id="form-title" required placeholder="Entity Designation (Title)" class="w-full px-4 py-3 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none">
+          <input type="text" id="form-title" required placeholder="Entity Designation (Title)" class="w-full px-4 py-3 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none transition-colors focus:shadow-[0_0_10px_rgba(0,240,255,0.2)]">
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <input type="text" id="form-subject" required placeholder="Category/Subject" class="w-full px-4 py-3 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none">
-          <select id="form-priority" class="w-full px-4 py-3 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none">
+          <input type="text" id="form-subject" required placeholder="Category/Subject" class="w-full px-4 py-3 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none transition-colors">
+          <select id="form-priority" class="w-full px-4 py-3 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none transition-colors cursor-pointer">
             <option value="1">Low Priority</option>
             <option value="2" selected>Standard Priority</option>
             <option value="3">Critical Priority</option>
           </select>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <input type="datetime-local" id="form-duedate" required class="w-full px-4 py-3 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none text-textSecondary">
-          <input type="number" step="0.5" id="form-duration" required placeholder="Est. Hours" class="w-full px-4 py-3 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none">
+          <input type="datetime-local" id="form-duedate" required class="w-full px-4 py-3 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none text-textSecondary transition-colors">
+          <input type="number" step="0.5" id="form-duration" required placeholder="Est. Hours" class="w-full px-4 py-3 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none transition-colors">
         </div>
-        <button type="submit" class="w-full py-3 rounded-xl bg-neonCyan text-bgDark font-bold text-sm hover:opacity-90 shadow-[0_0_15px_rgba(0,240,255,0.4)]">Initialize Entity</button>
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-neonCyan text-bgDark font-bold text-sm hover:scale-[1.02] transition-all duration-300 shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:shadow-[0_0_25px_rgba(0,240,255,0.6)] mt-2">Initialize Entity</button>
       </form>
     </div>
   </div>
 
   <script>
-    // --- GAMIFICATION & DATA STATE ---
     let assignments = JSON.parse(localStorage.getItem('dlos_v2_tasks') || '[]');
     let stats = JSON.parse(localStorage.getItem('dlos_v2_stats') || '{"focusMinutes":0, "xp":0, "level":1}');
     
-    // --- TIMER STATE ---
     let timerInterval = null;
-    let isWorkCycle = true; // true = 25m, false = 5m
+    let isWorkCycle = true;
     let totalSeconds = 25 * 60;
     let remainingSeconds = 25 * 60;
     let isRunning = false;
     let currentFocusId = null;
-
-    // --- AUDIO ---
     let audioCtx = null; let noiseNode = null;
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -305,30 +325,36 @@
       renderAll();
     });
 
-    // --- GAMIFICATION LOGIC ---
     function addXP(amount) {
       stats.xp += amount;
       let xpNeeded = stats.level * 100;
       if (stats.xp >= xpNeeded) {
         stats.level++;
         stats.xp -= xpNeeded;
-        alert(`LEVEL UP! You are now Level ${stats.level}. Systems Upgraded.`);
+        triggerLevelUpAnimation();
       }
       saveData();
       updateGamificationUI();
     }
 
+    function triggerLevelUpAnimation() {
+      const fill = document.getElementById('xp-fill');
+      fill.classList.add('animate-pulse');
+      setTimeout(() => fill.classList.remove('animate-pulse'), 2000);
+      alert(`LEVEL UP! You are now Level ${stats.level}. Systems Upgraded.`);
+    }
+
     function updateGamificationUI() {
       let xpNeeded = stats.level * 100;
       document.getElementById('player-level').textContent = stats.level;
-      document.getElementById('player-xp').textContent = stats.xp;
-      document.getElementById('player-next-xp').textContent = xpNeeded;
       
-      let percentage = (stats.xp / xpNeeded) * 100;
-      document.getElementById('xp-fill').style.width = `${percentage}%`;
+      // Delay width change slightly so DOM calculates first
+      setTimeout(() => {
+        let percentage = Math.min((stats.xp / xpNeeded) * 100, 100);
+        document.getElementById('xp-fill').style.width = `${percentage}%`;
+      }, 100);
     }
 
-    // --- CORE LOGIC ---
     function renderAll() {
       renderHome();
       renderAssignments();
@@ -339,21 +365,53 @@
     function switchTab(tab) {
       ['home', 'assignments', 'focus', 'stats'].forEach(t => {
         document.getElementById(`page-${t}`).classList.add('hidden');
-        document.getElementById(`tab-${t}`).className = "nav-btn px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-textSecondary hover:text-textPrimary whitespace-nowrap";
+        document.getElementById(`tab-${t}`).className = "nav-btn px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-textSecondary hover:text-textPrimary whitespace-nowrap transition-all duration-300 hover:scale-105";
       });
-      document.getElementById(`page-${tab}`).classList.remove('hidden');
       
-      let colorClass = tab === 'focus' ? 'bg-neonViolet text-white' : 'bg-neonCyan text-bgDark';
-      document.getElementById(`tab-${tab}`).className = `nav-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 ${colorClass} whitespace-nowrap shadow-lg`;
+      const page = document.getElementById(`page-${tab}`);
+      page.classList.remove('hidden');
+      
+      // Re-trigger animation by cloning and replacing
+      const cloned = page.cloneNode(true);
+      page.parentNode.replaceChild(cloned, page);
+      
+      let colorClass = tab === 'focus' ? 'bg-neonViolet text-white shadow-[0_0_15px_rgba(184,41,255,0.4)]' : 'bg-neonCyan text-bgDark shadow-[0_0_15px_rgba(0,240,255,0.4)]';
+      document.getElementById(`tab-${tab}`).className = `nav-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 ${colorClass} whitespace-nowrap transition-all duration-300 transform scale-105`;
+      
+      lucide.createIcons();
     }
 
-    function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+    function toggleModal(id) { 
+      const modal = document.getElementById(id);
+      const content = modal.querySelector('.glass-panel');
+      
+      if(modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
+        // Small delay to allow display block to render before opacity kicks in
+        setTimeout(() => {
+          modal.setAttribute('data-state', 'open');
+          content.setAttribute('data-state', 'open');
+        }, 10);
+      } else {
+        modal.removeAttribute('data-state');
+        content.removeAttribute('data-state');
+        setTimeout(() => modal.classList.add('hidden'), 300); // match transition duration
+      }
+    }
 
     function setAddMode(mode) {
       const isManual = mode === 'manual';
-      document.getElementById('mode-btn-manual').className = `flex-1 py-2.5 rounded-lg font-bold ${isManual ? 'bg-neonCyan text-bgDark' : 'text-textSecondary'}`;
-      document.getElementById('mode-btn-ocr').className = `flex-1 py-2.5 rounded-lg font-bold ${!isManual ? 'bg-neonCyan text-bgDark' : 'text-textSecondary'}`;
-      document.getElementById('ocr-container').classList.toggle('hidden', isManual);
+      document.getElementById('mode-btn-manual').className = `flex-1 py-2.5 rounded-lg font-bold transition-all duration-300 ${isManual ? 'bg-neonCyan text-bgDark shadow-sm' : 'text-textSecondary hover:text-white'}`;
+      document.getElementById('mode-btn-ocr').className = `flex-1 py-2.5 rounded-lg font-bold transition-all duration-300 ${!isManual ? 'bg-neonCyan text-bgDark shadow-sm' : 'text-textSecondary hover:text-white'}`;
+      
+      const ocr = document.getElementById('ocr-container');
+      if(isManual) {
+        ocr.style.opacity = '0';
+        setTimeout(() => ocr.classList.add('hidden'), 300);
+      } else {
+        ocr.classList.remove('hidden');
+        setTimeout(() => ocr.style.opacity = '1', 10);
+      }
     }
 
     async function processOCR(e) {
@@ -392,17 +450,30 @@
 
     function toggleComplete(id) {
       let task = assignments.find(a => a.id === id);
-      if(!task.completed) addXP(50); // Reward for completion
+      const el = document.getElementById(`task-card-${id}`);
+      
+      if(!task.completed) {
+        addXP(50);
+        // Play completion animation
+        el.classList.add('scale-95', 'opacity-50');
+      } else {
+        el.classList.remove('scale-95', 'opacity-50');
+      }
+      
       task.completed = !task.completed;
-      saveData(); renderAll();
+      saveData(); 
+      setTimeout(renderAll, 300); // re-render after anim
     }
 
     function deleteAssignment(id) {
-      assignments = assignments.filter(a => a.id !== id);
-      saveData(); renderAll();
+      const el = document.getElementById(`task-card-${id}`);
+      el.classList.add('scale-90', 'opacity-0');
+      setTimeout(() => {
+        assignments = assignments.filter(a => a.id !== id);
+        saveData(); renderAll();
+      }, 300);
     }
 
-    // --- AI SIMULATOR ---
     function generateSubtasksAI(id) {
       const task = assignments.find(a => a.id === id);
       if(!task) return;
@@ -423,11 +494,10 @@
     function toggleSubtask(taskId, idx) {
       let task = assignments.find(a => a.id === taskId);
       task.subtasks[idx].done = !task.subtasks[idx].done;
-      if(task.subtasks[idx].done) addXP(10); // Reward micro-tasks
+      if(task.subtasks[idx].done) addXP(10);
       saveData(); renderAssignments();
     }
 
-    // --- RENDERING ---
     function getSorted() {
       return assignments.filter(a => !a.completed).map(t => {
         let hrs = Math.max(0.1, (new Date(t.dueDate) - new Date()) / 3600000);
@@ -446,11 +516,17 @@
         document.getElementById('next-duedate').textContent = new Date(top.dueDate).toLocaleDateString();
         document.getElementById('next-reason').textContent = "Algorithm optimized for nearest deadline and payload.";
         currentFocusId = top.id;
-        btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        
+        btn.disabled = false; 
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        btn.classList.add('animate-pulse-glow-violet');
       } else {
         document.getElementById('next-title').textContent = "Database Clear";
         ['next-subject', 'next-duration', 'next-countdown', 'next-duedate'].forEach(id => document.getElementById(id).textContent = '--');
-        btn.disabled = true; btn.classList.add('opacity-50');
+        
+        btn.disabled = true; 
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.classList.remove('animate-pulse-glow-violet');
       }
     }
 
@@ -464,8 +540,8 @@
         (s === 'ALL' || a.subject === s)
       );
 
-      list.innerHTML = filtered.map(t => `
-        <div class="glass-panel p-5 rounded-xl border border-white/5 ${t.completed ? 'opacity-40 grayscale' : ''}">
+      list.innerHTML = filtered.map((t, index) => `
+        <div id="task-card-${t.id}" class="glass-panel p-5 rounded-xl border border-white/5 stagger-item animate-fade-in-up transition-all duration-500 hover:-translate-y-1 hover:shadow-lg ${t.completed ? 'opacity-40 grayscale scale-[0.98]' : ''}" style="animation-delay: ${index * 0.1}s; animation-fill-mode: forwards;">
           <div class="flex justify-between items-start">
             <div>
               <span class="text-[10px] uppercase font-bold text-neonCyan tracking-wider bg-neonCyan/10 px-2 py-1 rounded-md mb-2 inline-block">${t.subject}</span>
@@ -473,35 +549,54 @@
               <div class="text-xs text-textSecondary mt-1">Due: ${new Date(t.dueDate).toLocaleString()}</div>
             </div>
             <div class="flex gap-2">
-              <button onclick="toggleComplete('${t.id}')" class="p-2.5 rounded-xl bg-bgDark hover:border-neonGreen hover:text-neonGreen text-textSecondary transition border border-white/5"><i data-lucide="check" class="w-4 h-4"></i></button>
-              <button onclick="deleteAssignment('${t.id}')" class="p-2.5 rounded-xl bg-bgDark hover:border-red-500 hover:text-red-500 text-textSecondary transition border border-white/5"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              <button onclick="toggleComplete('${t.id}')" class="p-2.5 rounded-xl bg-bgDark hover:border-neonGreen hover:text-neonGreen hover:scale-110 text-textSecondary transition-all duration-300 border border-white/5"><i data-lucide="check" class="w-4 h-4"></i></button>
+              <button onclick="deleteAssignment('${t.id}')" class="p-2.5 rounded-xl bg-bgDark hover:border-red-500 hover:text-red-500 hover:scale-110 text-textSecondary transition-all duration-300 border border-white/5"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
           </div>
           
           <div class="mt-4 pt-4 border-t border-white/5">
             <div class="flex justify-between items-center mb-2">
               <span class="text-xs font-bold text-textSecondary uppercase">Micro-Tasks</span>
-              ${(!t.subtasks || t.subtasks.length === 0) ? `<button id="ai-btn-${t.id}" onclick="generateSubtasksAI('${t.id}')" class="text-[10px] text-neonViolet font-bold flex items-center gap-1 hover:text-white transition"><i data-lucide="sparkles" class="w-3 h-3"></i> AI Generate Breakdown</button>` : ''}
+              ${(!t.subtasks || t.subtasks.length === 0) ? `<button id="ai-btn-${t.id}" onclick="generateSubtasksAI('${t.id}')" class="text-[10px] text-neonViolet font-bold flex items-center gap-1 hover:text-white hover:scale-105 transition-all duration-300"><i data-lucide="sparkles" class="w-3 h-3"></i> AI Breakdown</button>` : ''}
             </div>
             <div class="space-y-2">
               ${(t.subtasks||[]).map((st, i) => `
-                <div class="flex items-center gap-3 text-sm">
-                  <input type="checkbox" ${st.done?'checked':''} onchange="toggleSubtask('${t.id}',${i})" class="accent-neonCyan w-4 h-4 rounded">
-                  <span class="${st.done ? 'line-through text-textSecondary' : 'text-textPrimary'}">${st.title}</span>
+                <div class="flex items-center gap-3 text-sm group">
+                  <input type="checkbox" ${st.done?'checked':''} onchange="toggleSubtask('${t.id}',${i})" class="accent-neonCyan w-4 h-4 rounded cursor-pointer transition-transform group-hover:scale-110">
+                  <span class="transition-all duration-300 ${st.done ? 'line-through text-textSecondary opacity-50' : 'text-textPrimary'}">${st.title}</span>
                 </div>
               `).join('')}
             </div>
           </div>
         </div>
       `).join('');
+      
       lucide.createIcons();
     }
 
     function renderStats() {
-      document.getElementById('stat-focus-time').textContent = stats.focusMinutes;
-      document.getElementById('stat-completed-count').textContent = assignments.filter(a=>a.completed).length;
+      // Small number counter animation
+      animateValue('stat-focus-time', 0, stats.focusMinutes, 1000);
+      animateValue('stat-completed-count', 0, assignments.filter(a=>a.completed).length, 1000);
       let totalEarned = (stats.level-1)*100 + stats.xp;
-      document.getElementById('stat-total-xp').textContent = totalEarned;
+      animateValue('stat-total-xp', 0, totalEarned, 1500);
+    }
+
+    function animateValue(id, start, end, duration) {
+      if (start === end) {
+        document.getElementById(id).innerHTML = end;
+        return;
+      }
+      let range = end - start;
+      let current = start;
+      let increment = end > start ? 1 : -1;
+      let stepTime = Math.abs(Math.floor(duration / range));
+      let obj = document.getElementById(id);
+      let timer = setInterval(function() {
+        current += increment;
+        obj.innerHTML = current;
+        if (current == end) { clearInterval(timer); }
+      }, stepTime);
     }
 
     function populateFilters() {
@@ -510,7 +605,6 @@
       sel.innerHTML = `<option value="ALL">All Categories</option>` + subs.map(s => `<option value="${s}">${s}</option>`).join('');
     }
 
-    // --- POMODORO FLOW ---
     function startFocusOnTopTask() {
       if(currentFocusId) {
         document.getElementById('focus-task-title').textContent = "Target: " + assignments.find(a=>a.id===currentFocusId).title;
@@ -522,9 +616,11 @@
       if(isRunning) {
         clearInterval(timerInterval); isRunning = false;
         document.getElementById('timer-btn-text').textContent = "Resume";
+        document.querySelector('.progress-ring__circle').classList.remove('animate-pulse');
       } else {
         isRunning = true;
         document.getElementById('timer-btn-text').textContent = "Pause";
+        document.querySelector('.progress-ring__circle').classList.add('animate-pulse');
         timerInterval = setInterval(tick, 1000);
       }
     }
@@ -534,30 +630,37 @@
         remainingSeconds--;
         updateRing();
         if(remainingSeconds % 60 === 0 && isWorkCycle) {
-          stats.focusMinutes++; addXP(1); // 1 XP per minute focused
+          stats.focusMinutes++; addXP(1);
         }
       } else {
         clearInterval(timerInterval);
         isRunning = false;
         playSynth();
         
-        // Switch Modes
         isWorkCycle = !isWorkCycle;
         totalSeconds = isWorkCycle ? 25*60 : 5*60;
         remainingSeconds = totalSeconds;
         
         const badge = document.getElementById('flow-mode-badge');
+        const ring = document.getElementById('timer-ring');
+        const panel = badge.closest('.glass-panel');
+        
         if(isWorkCycle) {
           badge.textContent = "Deep Work";
-          badge.className = "absolute top-6 px-3 py-1 rounded-full bg-neonViolet/20 border border-neonViolet/50 text-[10px] font-bold text-neonViolet uppercase tracking-widest";
-          document.getElementById('timer-ring').classList.replace('text-neonCyan', 'text-neonViolet');
+          badge.className = "absolute top-6 px-4 py-1.5 rounded-full bg-neonViolet/20 border border-neonViolet/50 text-[10px] font-bold text-neonViolet uppercase tracking-widest transition-all duration-500 scale-110";
+          ring.classList.replace('text-neonCyan', 'text-neonViolet');
+          panel.classList.replace('animate-pulse-glow-cyan', 'animate-pulse-glow-violet');
         } else {
           badge.textContent = "Neural Rest";
-          badge.className = "absolute top-6 px-3 py-1 rounded-full bg-neonCyan/20 border border-neonCyan/50 text-[10px] font-bold text-neonCyan uppercase tracking-widest";
-          document.getElementById('timer-ring').classList.replace('text-neonViolet', 'text-neonCyan');
+          badge.className = "absolute top-6 px-4 py-1.5 rounded-full bg-neonCyan/20 border border-neonCyan/50 text-[10px] font-bold text-neonCyan uppercase tracking-widest transition-all duration-500 scale-110";
+          ring.classList.replace('text-neonViolet', 'text-neonCyan');
+          panel.classList.replace('animate-pulse-glow-violet', 'animate-pulse-glow-cyan');
         }
         
+        setTimeout(() => badge.classList.remove('scale-110'), 300);
+        
         document.getElementById('timer-btn-text').textContent = "Initiate Next Cycle";
+        document.querySelector('.progress-ring__circle').classList.remove('animate-pulse');
         updateRing();
       }
     }
@@ -567,17 +670,24 @@
       let s = (remainingSeconds%60).toString().padStart(2,'0');
       document.getElementById('timer-display').textContent = `${m}:${s}`;
       const r = document.getElementById('timer-ring');
-      r.style.strokeDashoffset = 282.74 - (remainingSeconds/totalSeconds)*282.74;
+      // Fix exact circumference offset
+      r.style.strokeDashoffset = 289.02 - (remainingSeconds/totalSeconds)*289.02;
     }
 
     function toggleAmbientNoise() {
-      if(noiseNode) { noiseNode.stop(); noiseNode = null; return; }
+      const btn = document.getElementById('ambient-btn');
+      if(noiseNode) { 
+        noiseNode.stop(); noiseNode = null; 
+        btn.classList.remove('text-neonCyan', 'border-neonCyan', 'scale-105');
+        return; 
+      }
       try {
+        btn.classList.add('text-neonCyan', 'border-neonCyan', 'scale-105');
         audioCtx = new (window.AudioContext||window.webkitAudioContext)();
         const bufSize = audioCtx.sampleRate * 2;
         const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
         const out = buf.getChannelData(0);
-        for(let i=0; i<bufSize; i++) out[i] = (Math.random()*2-1)*0.02; // Soft white noise
+        for(let i=0; i<bufSize; i++) out[i] = (Math.random()*2-1)*0.015; // Softer noise
         noiseNode = audioCtx.createBufferSource();
         noiseNode.buffer = buf; noiseNode.loop = true;
         noiseNode.connect(audioCtx.destination);
@@ -598,21 +708,28 @@
       } catch(e){}
     }
 
-    // --- CANVAS PARTICLES ---
     function initParticles() {
       const canvas = document.getElementById('particle-canvas');
       const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      
+      const resizeCanvas = () => {
+        canvas.width = window.innerWidth; 
+        canvas.height = window.innerHeight;
+      };
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
       
       let particles = [];
       let mouse = {x: null, y: null};
       window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
       
-      for(let i=0; i<70; i++) {
+      // Increased particle count for cinematic feel
+      for(let i=0; i<100; i++) {
         particles.push({
           x: Math.random()*canvas.width, y: Math.random()*canvas.height,
-          vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5,
-          size: Math.random()*2
+          vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3,
+          size: Math.random()*1.5 + 0.5,
+          color: Math.random() > 0.5 ? 'rgba(0, 240, 255, ' : 'rgba(184, 41, 255, ' // Mix cyan and violet
         });
       }
 
@@ -623,16 +740,26 @@
           if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
           if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
           
-          // Mouse interaction
+          let opacity = 0.3;
           if(mouse.x != null) {
             let dx = mouse.x - p.x; let dy = mouse.y - p.y;
             let dist = Math.sqrt(dx*dx + dy*dy);
-            if(dist < 100) { p.x -= dx*0.01; p.y -= dy*0.01; }
+            if(dist < 150) { 
+              p.x -= dx*0.015; p.y -= dy*0.015; 
+              opacity = 0.8; // Glow near mouse
+              
+              // Draw connecting lines
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(mouse.x, mouse.y);
+              ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 - dist/1500})`;
+              ctx.stroke();
+            }
           }
           
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-          ctx.fillStyle = 'rgba(0, 240, 255, 0.3)';
+          ctx.fillStyle = p.color + opacity + ')';
           ctx.fill();
         });
         requestAnimationFrame(animate);
