@@ -5,12 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DeadlineOS Ultimate — Cinematic Edition</title>
   
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   
-  <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -86,7 +84,7 @@
       pointer-events: none;
     }
     .glass-panel {
-      background: rgba(11, 15, 23, 0.75);
+      background: rgba(11, 15, 23, 0.8);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.06);
@@ -102,7 +100,6 @@
     }
     #xp-fill { transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
     
-    /* Toast Notification Animation */
     @keyframes slideInToast {
       from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
@@ -115,7 +112,7 @@
   <canvas id="particle-canvas"></canvas>
   <div class="grid-background"></div>
 
-  <!-- TOAST NOTIFICATION CONTAINER -->
+  <!-- TOAST CONTAINER -->
   <div id="toast-container" class="fixed top-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
   <!-- COMMAND PALETTE MODAL -->
@@ -126,9 +123,7 @@
         <input type="text" id="cmd-input" oninput="handleCommandSearch(event)" placeholder="Type a command or search tasks (Ctrl+K)..." class="w-full bg-transparent text-textPrimary placeholder-textSecondary text-sm outline-none">
         <span class="text-[10px] text-textSecondary px-2 py-0.5 rounded bg-elevatedDark">ESC</span>
       </div>
-      <div id="cmd-results" class="max-h-64 overflow-y-auto space-y-1">
-        <!-- Dynamic command list -->
-      </div>
+      <div id="cmd-results" class="max-h-64 overflow-y-auto space-y-1"></div>
     </div>
   </div>
 
@@ -141,7 +136,7 @@
       <div>
         <div class="flex items-center gap-2">
           <span class="font-display font-bold text-2xl tracking-wider">DEADLINE<span class="text-neonCyan">OS</span></span>
-          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-neonCyan/10 text-neonCyan border border-neonCyan/30">v3.0</span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-neonCyan/10 text-neonCyan border border-neonCyan/30">v3.1</span>
         </div>
         <div class="flex items-center gap-2 mt-1">
           <span class="text-[10px] font-bold text-neonViolet uppercase tracking-wider">Lvl <span id="player-level">1</span></span>
@@ -187,12 +182,17 @@
           <h1 id="greeting" class="font-display text-3xl font-bold">System Online</h1>
           <p class="text-textSecondary text-sm mt-1">Here is your automated priority mission briefing.</p>
         </div>
-        <button onclick="toggleModal('add-modal')" class="px-4 py-2.5 rounded-xl bg-neonCyan text-bgDark font-bold text-xs flex items-center gap-2 hover:opacity-90 transition shadow-lg shadow-neonCyan/20">
-          <i data-lucide="plus" class="w-4 h-4"></i> Add Assignment
-        </button>
+        <div class="flex gap-2">
+          <button onclick="openOCRModal()" class="px-4 py-2.5 rounded-xl bg-elevatedDark border border-neonViolet/40 text-neonViolet font-bold text-xs flex items-center gap-2 hover:bg-neonViolet/10 transition">
+            <i data-lucide="scan" class="w-4 h-4"></i> OCR Scan Screenshot
+          </button>
+          <button onclick="toggleModal('add-modal')" class="px-4 py-2.5 rounded-xl bg-neonCyan text-bgDark font-bold text-xs flex items-center gap-2 hover:opacity-90 transition shadow-lg shadow-neonCyan/20">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add Assignment
+          </button>
+        </div>
       </div>
 
-      <!-- DO THIS NEXT HERO CARD -->
+      <!-- HERO CARD -->
       <div class="glass-panel p-6 rounded-2xl border-neonCyan/40 animate-pulse-glow-cyan relative overflow-hidden">
         <div class="flex justify-between items-start mb-3">
           <span class="text-xs font-bold uppercase tracking-widest text-neonCyan flex items-center gap-2">
@@ -229,7 +229,7 @@
         </button>
       </div>
 
-      <!-- WORKLOAD CAPACITY BAR & UPCOMING QUEUE -->
+      <!-- CAPACITY & QUEUE -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="glass-panel p-6 rounded-2xl space-y-4">
           <h3 class="font-display text-base font-bold flex items-center gap-2">
@@ -261,9 +261,7 @@
             </h3>
             <button onclick="switchTab('assignments')" class="text-xs text-neonCyan hover:underline">View All &rarr;</button>
           </div>
-          <div id="home-queue-list" class="space-y-2.5">
-            <!-- Populated dynamically -->
-          </div>
+          <div id="home-queue-list" class="space-y-2.5"></div>
         </div>
       </div>
     </section>
@@ -275,12 +273,16 @@
           <h1 class="font-display text-3xl font-bold">Task Database</h1>
           <p class="text-textSecondary text-sm mt-1">Filter, sort, and manage academic workloads.</p>
         </div>
-        <button onclick="toggleModal('add-modal')" class="px-5 py-3 rounded-xl bg-neonCyan text-bgDark font-bold text-sm flex items-center gap-2 hover:opacity-90 transition shadow-lg shadow-neonCyan/20">
-          <i data-lucide="plus" class="w-5 h-5"></i> Add Assignment
-        </button>
+        <div class="flex gap-2">
+          <button onclick="openOCRModal()" class="px-4 py-2.5 rounded-xl bg-elevatedDark border border-neonViolet/40 text-neonViolet font-bold text-xs flex items-center gap-2 hover:bg-neonViolet/10 transition">
+            <i data-lucide="scan" class="w-4 h-4"></i> OCR Scan
+          </button>
+          <button onclick="toggleModal('add-modal')" class="px-5 py-3 rounded-xl bg-neonCyan text-bgDark font-bold text-sm flex items-center gap-2 hover:opacity-90 transition shadow-lg shadow-neonCyan/20">
+            <i data-lucide="plus" class="w-5 h-5"></i> Add Assignment
+          </button>
+        </div>
       </div>
 
-      <!-- SEARCH, FILTER, SORT BAR -->
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
         <div class="sm:col-span-2 relative">
           <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-textSecondary"></i>
@@ -309,7 +311,6 @@
       </div>
 
       <div class="glass-panel p-8 rounded-[2rem] animate-pulse-glow-violet flex flex-col items-center justify-center max-w-md mx-auto relative overflow-hidden">
-        
         <div id="flow-mode-badge" class="absolute top-6 px-4 py-1.5 rounded-full bg-neonViolet/20 border border-neonViolet/50 text-[10px] font-bold text-neonViolet uppercase tracking-widest">
           Deep Work Cycle
         </div>
@@ -369,24 +370,72 @@
     </section>
   </main>
 
+  <!-- OCR SCANNER & UPLOAD MODAL -->
+  <div id="ocr-modal" class="hidden fixed inset-0 bg-bgDark/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-xl rounded-3xl p-6 space-y-5 animate-modal-pop max-h-[95vh] overflow-y-auto border-neonViolet/30">
+      <div class="flex justify-between items-center pb-3 border-b border-white/5">
+        <div class="flex items-center gap-2">
+          <i data-lucide="scan" class="w-5 h-5 text-neonViolet"></i>
+          <h3 class="font-display text-xl font-bold">Intelligent Screenshot Scanner</h3>
+        </div>
+        <button onclick="toggleModal('ocr-modal')" class="text-textSecondary hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+      </div>
+
+      <div id="ocr-drop-zone" class="p-8 rounded-2xl border-2 border-dashed border-neonViolet/50 bg-neonViolet/5 text-center space-y-4 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-neonViolet/5 to-neonCyan/5 pointer-events-none"></div>
+        <i data-lucide="camera" class="w-12 h-12 text-neonViolet mx-auto animate-pulse"></i>
+        <div>
+          <div class="font-bold text-sm text-textPrimary">Upload Assignment or WSM Screenshot</div>
+          <div class="text-xs text-textSecondary mt-1">Supports PNG, JPG, WEBP • Extracts titles, due dates, & instructions</div>
+        </div>
+        <label class="inline-block px-6 py-3 rounded-xl bg-neonViolet text-white font-bold text-xs cursor-pointer hover:opacity-90 shadow-lg shadow-neonViolet/30 transition">
+          Browse Image File
+          <input type="file" id="ocr-file-input" accept="image/*" onchange="handleOCRFileUpload(event)" class="hidden">
+        </label>
+        <div id="ocr-progress-status" class="text-xs font-mono font-bold text-neonCyan hidden">Initializing Tesseract Engine...</div>
+      </div>
+
+      <div id="ocr-preview-container" class="hidden space-y-4">
+        <div class="relative rounded-xl overflow-hidden border border-white/10 max-h-48 bg-bgDark flex justify-center">
+          <img id="ocr-preview-img" class="object-contain max-h-48 w-full" alt="Uploaded Preview">
+        </div>
+        <button onclick="resetOCRUpload()" class="text-xs text-neonCyan hover:underline flex items-center gap-1">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Upload a different image
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OCR REVIEW MODAL -->
+  <div id="ocr-review-modal" class="hidden fixed inset-0 bg-bgDark/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 space-y-5 animate-modal-pop max-h-[95vh] overflow-y-auto border-neonCyan/40">
+      <div class="flex justify-between items-center pb-3 border-b border-white/5">
+        <div>
+          <h3 class="font-display text-xl font-bold text-neonCyan">Assignments Detected</h3>
+          <p class="text-xs text-textSecondary mt-0.5">Review and verify extracted details before importing to DeadlineOS.</p>
+        </div>
+        <button onclick="toggleModal('ocr-review-modal')" class="text-textSecondary hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+      </div>
+
+      <div id="ocr-drafts-list" class="space-y-4 max-h-[55vh] overflow-y-auto pr-1">
+        <!-- Dynamically populated draft cards -->
+      </div>
+
+      <div class="flex justify-between items-center pt-3 border-t border-white/5">
+        <button onclick="toggleModal('ocr-review-modal')" class="px-4 py-2.5 rounded-xl bg-bgDark text-xs font-semibold text-textSecondary hover:text-white">Cancel</button>
+        <button onclick="commitSelectedDrafts()" class="px-6 py-3 rounded-xl bg-neonCyan text-bgDark font-bold text-xs hover:opacity-90 transition shadow-lg shadow-neonCyan/30 flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> Add Selected Assignments
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ADD / EDIT ASSIGNMENT MODAL -->
   <div id="add-modal" class="hidden fixed inset-0 bg-bgDark/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="glass-panel w-full max-w-lg rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto animate-modal-pop">
       <div class="flex justify-between items-center pb-3 border-b border-white/5">
         <h3 id="modal-title" class="font-display text-xl font-bold">New Assignment</h3>
         <button onclick="toggleModal('add-modal')" class="text-textSecondary hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
-      </div>
-
-      <div class="flex bg-bgDark p-1 rounded-xl text-xs font-bold border border-white/5">
-        <button onclick="setAddMode('manual')" id="mode-btn-manual" class="flex-1 py-2.5 rounded-lg bg-neonCyan text-bgDark transition-colors">Manual Input</button>
-        <button onclick="setAddMode('ocr')" id="mode-btn-ocr" class="flex-1 py-2.5 rounded-lg text-textSecondary hover:text-white transition-colors">OCR Screenshot Scan</button>
-      </div>
-
-      <div id="ocr-container" class="hidden p-6 rounded-xl border-2 border-dashed border-neonViolet bg-neonViolet/5 text-center space-y-3">
-        <i data-lucide="camera" class="w-10 h-10 text-neonViolet mx-auto"></i>
-        <div class="text-xs text-textSecondary">Upload an assignment screenshot or syllabus image</div>
-        <input type="file" id="ocr-file-input" accept="image/*" onchange="processOCR(event)" class="text-xs text-textSecondary file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-neonViolet file:text-white file:font-bold cursor-pointer">
-        <div id="ocr-status" class="text-xs font-bold text-neonViolet hidden">Scanning image text...</div>
       </div>
 
       <form id="assignment-form" onsubmit="handleSaveAssignment(event)" class="space-y-4">
@@ -423,8 +472,8 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-textSecondary mb-1">Optional Notes</label>
-          <textarea id="form-notes" placeholder="Additional details..." class="w-full px-4 py-2.5 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none h-20 resize-none"></textarea>
+          <label class="block text-xs font-semibold text-textSecondary mb-1">Instructions / Notes</label>
+          <textarea id="form-notes" placeholder="Additional details or instructions..." class="w-full px-4 py-2.5 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none h-20 resize-none"></textarea>
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
@@ -450,7 +499,7 @@
         </div>
 
         <div class="space-y-2 pt-2 border-t border-white/5">
-          <label class="block text-textSecondary font-semibold">Visual Effects & Performance</label>
+          <label class="block text-textSecondary font-semibold">Visual Effects & Particle Density</label>
           <div class="grid grid-cols-2 gap-2">
             <button onclick="setParticleMode('performance')" id="mode-perf" class="py-2 px-3 rounded-lg bg-bgDark border border-white/15 text-textSecondary hover:text-white font-semibold">Performance</button>
             <button onclick="setParticleMode('balanced')" id="mode-bal" class="py-2 px-3 rounded-lg bg-neonViolet text-white font-semibold">Balanced</button>
@@ -476,7 +525,6 @@
 
   <!-- JAVASCRIPT ENGINE -->
   <script>
-    // --- STATE MANAGEMENT ---
     let assignments = JSON.parse(localStorage.getItem('dlos_v2_tasks') || '[]');
     let stats = JSON.parse(localStorage.getItem('dlos_v2_stats') || '{"focusMinutes":0, "xp":0, "level":1}');
     let settings = JSON.parse(localStorage.getItem('dlos_v2_settings') || '{"capacity":3.0, "particleMode":"balanced"}');
@@ -487,12 +535,11 @@
     let totalSeconds = 25 * 60;
     let remainingSeconds = 25 * 60;
     let isTimerRunning = false;
-    let focusStartTime = null;
+    let extractedDraftsCache = [];
 
     let audioCtx = null;
     let noiseNode = null;
 
-    // --- INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
       initParticles();
@@ -501,7 +548,6 @@
       highlightParticleModeBtn(settings.particleMode);
       renderAll();
 
-      // Keyboard Shortcut: Ctrl+K / Cmd+K for Command Palette
       window.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
           e.preventDefault();
@@ -530,9 +576,9 @@
       }, 3500);
     }
 
-    // --- SECURE HTML ESCAPING ---
     function escapeHTML(str) {
-      return str.replace(/[&<>'"]/g, 
+      if (!str) return '';
+      return str.toString().replace(/[&<>'"]/g, 
         tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
       );
     }
@@ -559,7 +605,7 @@
       }, 50);
     }
 
-    // --- TAB SWITCHING ---
+    // --- TAB SWITCHING & MODALS ---
     function switchTab(tab) {
       ['home', 'assignments', 'focus', 'stats'].forEach(t => {
         document.getElementById(`page-${t}`).classList.add('hidden');
@@ -571,97 +617,214 @@
     }
 
     function toggleModal(id) {
-      const modal = document.getElementById(id);
-      modal.classList.toggle('hidden');
-      if(id === 'add-modal' && !modal.classList.contains('hidden')) {
+      document.getElementById(id).classList.toggle('hidden');
+      if(id === 'add-modal' && !document.getElementById('add-modal').classList.contains('hidden')) {
         document.getElementById('assignment-form').reset();
         document.getElementById('form-edit-id').value = '';
         document.getElementById('modal-title').textContent = 'New Assignment';
       }
     }
 
-    function toggleCommandPalette() {
-      const cp = document.getElementById('command-palette');
-      cp.classList.toggle('hidden');
-      if (!cp.classList.contains('hidden')) {
-        document.getElementById('cmd-input').focus();
-        renderCommandResults('');
-      }
+    function openOCRModal() {
+      resetOCRUpload();
+      toggleModal('ocr-modal');
     }
 
-    function handleCommandSearch(e) {
-      renderCommandResults(e.target.value.toLowerCase());
+    function resetOCRUpload() {
+      document.getElementById('ocr-drop-zone').classList.remove('hidden');
+      document.getElementById('ocr-preview-container').classList.add('hidden');
+      document.getElementById('ocr-progress-status').classList.add('hidden');
+      document.getElementById('ocr-file-input').value = '';
     }
 
-    function renderCommandResults(query) {
-      const resultsContainer = document.getElementById('cmd-results');
-      resultsContainer.innerHTML = '';
-
-      const actions = [
-        { name: 'Navigate to Home', icon: 'home', action: () => { switchTab('home'); toggleCommandPalette(); } },
-        { name: 'View Task Database', icon: 'layers', action: () => { switchTab('assignments'); toggleCommandPalette(); } },
-        { name: 'Open Focus Flow', icon: 'crosshair', action: () => { switchTab('focus'); toggleCommandPalette(); } },
-        { name: 'Add New Assignment', icon: 'plus', action: () => { toggleCommandPalette(); toggleModal('add-modal'); } },
-        { name: 'Open Settings', icon: 'settings', action: () => { toggleCommandPalette(); toggleModal('settings-modal'); } }
-      ].filter(a => a.name.toLowerCase().includes(query));
-
-      const matchingTasks = assignments.filter(t => !t.completed && t.title.toLowerCase().includes(query));
-
-      let html = '';
-      actions.forEach((act, idx) => {
-        html += `<div onclick="executeCmd(${idx})" class="p-2.5 rounded-xl bg-bgDark hover:bg-elevatedDark cursor-pointer flex items-center gap-3 text-sm transition"><i data-lucide="${act.icon}" class="w-4 h-4 text-neonCyan"></i><span>${escapeHTML(act.name)}</span></div>`;
-      });
-
-      matchingTasks.slice(0, 3).forEach(task => {
-        html += `<div onclick="quickStartTask('${task.id}')" class="p-2.5 rounded-xl bg-bgDark hover:bg-elevatedDark cursor-pointer flex items-center justify-between text-sm transition"><div class="flex items-center gap-2"><i data-lucide="target" class="w-4 h-4 text-neonViolet"></i><span>${escapeHTML(task.title)}</span></div><span class="text-xs text-textSecondary">${escapeHTML(task.subject)}</span></div>`;
-      });
-
-      resultsContainer.innerHTML = html || '<div class="p-3 text-center text-xs text-textSecondary">No matching results</div>';
-      lucide.createIcons();
-      window._cmdActions = actions;
-    }
-
-    function executeCmd(idx) {
-      if (window._cmdActions && window._cmdActions[idx]) {
-        window._cmdActions[idx].action();
-      }
-    }
-
-    function quickStartTask(id) {
-      currentFocusId = id;
-      const task = assignments.find(a => a.id === id);
-      if (task) document.getElementById('focus-task-title').textContent = `Target: ${task.title}`;
-      toggleCommandPalette();
-      switchTab('focus');
-    }
-
-    // --- ASSIGNMENT MANAGEMENT ---
-    function setAddMode(mode) {
-      const isManual = mode === 'manual';
-      document.getElementById('mode-btn-manual').className = `flex-1 py-2.5 rounded-lg font-bold transition-all ${isManual ? 'bg-neonCyan text-bgDark' : 'text-textSecondary'}`;
-      document.getElementById('mode-btn-ocr').className = `flex-1 py-2.5 rounded-lg font-bold transition-all ${!isManual ? 'bg-neonCyan text-bgDark' : 'text-textSecondary'}`;
-      document.getElementById('ocr-container').classList.toggle('hidden', isManual);
-    }
-
-    async function processOCR(e) {
+    // --- TWO-STAGE OCR INTELLIGENCE ENGINE ---
+    async function handleOCRFileUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
-      const status = document.getElementById('ocr-status');
-      status.classList.remove('hidden');
-      status.textContent = "Scanning image pixels...";
+
+      const dropZone = document.getElementById('ocr-drop-zone');
+      const previewContainer = document.getElementById('ocr-preview-container');
+      const previewImg = document.getElementById('ocr-preview-img');
+      const statusEl = document.getElementById('ocr-progress-status');
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (evt) => { previewImg.src = evt.target.result; };
+      reader.readAsDataURL(file);
+
+      dropZone.classList.add('hidden');
+      previewContainer.classList.remove('hidden');
+      statusEl.classList.remove('hidden');
+      statusEl.textContent = "Stage A: Reading full text via Tesseract OCR...";
+
       try {
-        const res = await Tesseract.recognize(file, 'eng');
-        const text = res.data.text;
-        const firstLine = text.split('\n').find(l => l.trim().length > 3);
-        if (firstLine) document.getElementById('form-title').value = firstLine.trim();
-        status.textContent = "OCR Complete! Review details below.";
-        showToast("Assignment extracted from image!", "success");
+        const worker = await Tesseract.createWorker('eng');
+        const ret = await worker.recognize(file);
+        await worker.terminate();
+
+        const rawText = ret.data.text || '';
+        statusEl.textContent = "Stage B: Parsing structure, dates, and instructions...";
+
+        setTimeout(() => {
+          extractedDraftsCache = parseOCRToAssignments(rawText);
+          toggleModal('ocr-modal');
+          renderOCRReviewScreen(rawText);
+          toggleModal('ocr-review-modal');
+        }, 500);
+
       } catch (err) {
-        status.textContent = "OCR decoding failed.";
-        showToast("Failed to read image text.", "error");
+        statusEl.textContent = "OCR recognition error. Try a clearer image.";
+        showToast("OCR processing failed.", "error");
       }
     }
 
+    // Stage B Parser: Extracts title, subject, due dates, and full text instructions
+    function parseOCRToAssignments(text) {
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length === 0) return [];
+
+      let assignmentsFound = [];
+      
+      // Heuristic detection for multiple blocks or single block
+      let currentTitle = lines[0] || "Imported Assignment";
+      let currentSubject = "General";
+      let currentDueDate = new Date(Date.now() + 86400000 * 2).toISOString().slice(0, 16); // Default 2 days out
+      let instructionsBuffer = [];
+      let uncertainDate = true;
+
+      const subjectKeywords = ['math', 'algebra', 'calculus', 'geometry', 'biology', 'chemistry', 'physics', 'history', 'english', 'literature', 'science', 'art', 'music', 'wsm', 'computer', 'spanish'];
+      
+      lines.forEach(line => {
+        const lower = line.toLowerCase();
+        
+        // Detect Subject
+        subjectKeywords.forEach(sub => {
+          if (lower.includes(sub)) {
+            currentSubject = line.length < 25 ? line : sub.charAt(0).toUpperCase() + sub.slice(1);
+          }
+        });
+
+        // Detect Due Date patterns
+        if (lower.includes('due') || lower.includes('deadline') || lower.includes('by') || lower.includes('oct') || lower.includes('nov') || lower.includes('dec') || lower.includes('jan') || lower.includes('feb') || lower.includes('mar') || lower.includes('apr') || lower.includes('may') || lower.includes('jun') || lower.includes('jul') || lower.includes('aug') || lower.includes('sep') || lower.includes('fri') || lower.includes('mon') || lower.includes('tue') || lower.includes('wed') || lower.includes('thu') || lower.includes('sat') || lower.includes('sun')) {
+          uncertainDate = false;
+          // Extract text for review
+        }
+
+        instructionsBuffer.push(line);
+      });
+
+      // If we found split items (e.g. multiple bullet points or numbered assignments)
+      let candidateTitle = lines.find(l => l.length > 5 && l.length < 60) || "Assignment from Screenshot";
+
+      assignmentsFound.push({
+        title: candidateTitle,
+        subject: currentSubject,
+        dueDate: currentDueDate,
+        duration: 1.5,
+        priority: 2,
+        notes: instructionsBuffer.join('\n'),
+        uncertainDate: uncertainDate,
+        rawText: text,
+        selected: true
+      });
+
+      return assignmentsFound;
+    }
+
+    function renderOCRReviewScreen(rawText) {
+      const container = document.getElementById('ocr-drafts-list');
+      container.innerHTML = '';
+
+      extractedDraftsCache.forEach((draft, idx) => {
+        const card = document.createElement('div');
+        card.className = `glass-panel p-4 rounded-2xl border ${draft.uncertainDate ? 'border-statusWarning/40' : 'border-neonCyan/30'} space-y-3`;
+        
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="draft-sel-${idx}" ${draft.selected ? 'checked' : ''} onchange="extractedDraftsCache[${idx}].checked = this.checked" class="accent-neonCyan w-4 h-4 rounded">
+              <span class="text-xs font-bold text-neonCyan uppercase tracking-wider">Draft #${idx + 1}</span>
+              ${draft.uncertainDate ? '<span class="text-[10px] px-2 py-0.5 rounded bg-statusWarning/10 text-statusWarning border border-statusWarning/30">Verify Date</span>' : ''}
+            </div>
+            <button onclick="removeDraft(${idx})" class="text-textSecondary hover:text-red-400 text-xs"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="block text-textSecondary mb-1">Title</label>
+              <input type="text" id="draft-title-${idx}" value="${escapeHTML(draft.title)}" onchange="extractedDraftsCache[${idx}].title = this.value" class="w-full px-3 py-2 rounded-xl bg-bgDark border border-white/10 text-textPrimary">
+            </div>
+            <div>
+              <label class="block text-textSecondary mb-1">Subject</label>
+              <input type="text" id="draft-subject-${idx}" value="${escapeHTML(draft.subject)}" onchange="extractedDraftsCache[${idx}].subject = this.value" class="w-full px-3 py-2 rounded-xl bg-bgDark border border-white/10 text-textPrimary">
+            </div>
+            <div>
+              <label class="block text-textSecondary mb-1">Due Date & Time</label>
+              <input type="datetime-local" id="draft-date-${idx}" value="${draft.dueDate}" onchange="extractedDraftsCache[${idx}].dueDate = this.value" class="w-full px-3 py-2 rounded-xl bg-bgDark border border-white/10 text-textPrimary">
+            </div>
+            <div>
+              <label class="block text-textSecondary mb-1">Est. Duration (Hours)</label>
+              <input type="number" step="0.5" id="draft-dur-${idx}" value="${draft.duration}" onchange="extractedDraftsCache[${idx}].duration = parseFloat(this.value) || 1.0" class="w-full px-3 py-2 rounded-xl bg-bgDark border border-white/10 text-textPrimary">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs text-textSecondary mb-1">Extracted Instructions / Notes</label>
+            <textarea id="draft-notes-${idx}" onchange="extractedDraftsCache[${idx}].notes = this.value" class="w-full px-3 py-2 rounded-xl bg-bgDark border border-white/10 text-xs text-textPrimary h-16 resize-none">${escapeHTML(draft.notes)}</textarea>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function removeDraft(idx) {
+      extractedDraftsCache.splice(idx, 1);
+      renderOCRReviewScreen("");
+      if (extractedDraftsCache.length === 0) {
+        toggleModal('ocr-review-modal');
+        showToast("All drafts removed.", "error");
+      }
+    }
+
+    function commitSelectedDrafts() {
+      const selected = extractedDraftsCache.filter((_, idx) => {
+        const cb = document.getElementById(`draft-sel-${idx}`);
+        return cb && cb.checked;
+      });
+
+      if (selected.length === 0) {
+        showToast("No assignments selected for import.", "error");
+        return;
+      }
+
+      let addedCount = 0;
+      selected.forEach(d => {
+        // Duplicate check
+        const isDuplicate = assignments.some(a => a.title.toLowerCase() === d.title.toLowerCase() && a.subject.toLowerCase() === d.subject.toLowerCase());
+        
+        assignments.push({
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+          title: d.title,
+          subject: d.subject,
+          priority: d.priority,
+          dueDate: d.dueDate,
+          duration: d.duration,
+          notes: d.notes,
+          completed: false,
+          subtasks: []
+        });
+        addedCount++;
+      });
+
+      addXP(25 * addedCount);
+      saveData();
+      toggleModal('ocr-review-modal');
+      renderAll();
+      showToast(`Successfully imported ${addedCount} assignment(s)!`, "success");
+    }
+
+    // --- STANDARD ASSIGNMENTS MANAGEMENT ---
     function handleSaveAssignment(e) {
       e.preventDefault();
       const editId = document.getElementById('form-edit-id').value;
@@ -727,7 +890,7 @@
         assignments = assignments.filter(a => a.id !== id);
         saveData();
         renderAll();
-        showToast("Assignment deleted.", "success");
+        showToast("Assignment deleted.", "error");
       }
     }
 
@@ -782,7 +945,6 @@
       const nextCard = sorted[0];
       const startBtn = document.getElementById('start-focus-btn');
       
-      // Calculate workload capacity
       const plannedHours = assignments.filter(a => !a.completed).reduce((acc, curr) => acc + curr.duration, 0);
       document.getElementById('capacity-available').textContent = `${settings.capacity} hrs`;
       document.getElementById('capacity-planned').textContent = `${plannedHours.toFixed(1)} hrs`;
@@ -824,32 +986,20 @@
         startBtn.classList.add('opacity-50', 'cursor-not-allowed');
       }
 
-      // Render Home Queue
       const queueContainer = document.getElementById('home-queue-list');
       queueContainer.innerHTML = '';
       sorted.slice(0, 3).forEach(task => {
         const item = document.createElement('div');
         item.className = 'p-3 rounded-xl bg-bgDark border border-white/5 flex justify-between items-center';
-        
-        const infoDiv = document.createElement('div');
-        const titleEl = document.createElement('div');
-        titleEl.className = 'font-semibold text-sm';
-        titleEl.textContent = task.title;
-        
-        const subEl = document.createElement('div');
-        subEl.className = 'text-xs text-textSecondary';
-        subEl.textContent = `${task.subject} • ${task.duration}h est.`;
-        
-        infoDiv.appendChild(titleEl);
-        infoDiv.appendChild(subEl);
-        
-        const completeBtn = document.createElement('button');
-        completeBtn.className = 'p-2 rounded-lg bg-elevatedDark hover:bg-neonGreen/20 text-neonGreen transition';
-        completeBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
-        completeBtn.onclick = () => toggleComplete(task.id);
-        
-        item.appendChild(infoDiv);
-        item.appendChild(completeBtn);
+        item.innerHTML = `
+          <div>
+            <div class="font-semibold text-sm">${escapeHTML(task.title)}</div>
+            <div class="text-xs text-textSecondary">${escapeHTML(task.subject)} • ${task.duration}h est.</div>
+          </div>
+          <button onclick="toggleComplete('${task.id}')" class="p-2 rounded-lg bg-elevatedDark hover:bg-neonGreen/20 text-neonGreen transition">
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </button>
+        `;
         queueContainer.appendChild(item);
       });
       lucide.createIcons();
@@ -898,7 +1048,7 @@
                 <h4 class="font-bold text-base ${task.completed ? 'line-through' : ''}">${escapeHTML(task.title)}</h4>
               </div>
               <div class="text-xs text-textSecondary">Due: ${new Date(task.dueDate).toLocaleString()} • ${task.duration} hrs</div>
-              ${task.notes ? `<div class="text-xs text-textSecondary italic mt-1">${escapeHTML(task.notes)}</div>` : ''}
+              ${task.notes ? `<div class="text-xs text-textSecondary whitespace-pre-line mt-2 p-2.5 rounded-lg bg-bgDark/60 border border-white/5">${escapeHTML(task.notes)}</div>` : ''}
             </div>
             <div class="flex items-center gap-2">
               <button onclick="editAssignment('${task.id}')" class="p-2 rounded-xl bg-bgDark hover:border-neonCyan text-textSecondary hover:text-white transition border border-white/5" title="Edit">
@@ -931,7 +1081,7 @@
       document.getElementById('stat-total-xp').textContent = (stats.level - 1) * 100 + stats.xp;
     }
 
-    // --- TIMESTAMP-BASED FOCUS TIMER ---
+    // --- FOCUS TIMER ---
     function startFocusOnTopTask() {
       if (!currentFocusId) return;
       const task = assignments.find(a => a.id === currentFocusId);
@@ -940,16 +1090,12 @@
     }
 
     function toggleTimer() {
-      if (isTimerRunning) {
-        pauseTimer();
-      } else {
-        startTimer();
-      }
+      if (isTimerRunning) { pauseTimer(); } 
+      else { startTimer(); }
     }
 
     function startTimer() {
       isTimerRunning = true;
-      focusStartTime = Date.now();
       document.getElementById('timer-btn-text').textContent = 'Pause';
       document.getElementById('timer-status-text').textContent = isWorkCycle ? 'Deep Work' : 'Rest';
 
@@ -1016,8 +1162,7 @@
     function toggleAmbientNoise() {
       const btn = document.getElementById('ambient-btn');
       if (noiseNode) {
-        noiseNode.stop();
-        noiseNode = null;
+        noiseNode.stop(); noiseNode = null;
         btn.classList.remove('text-neonCyan', 'border-neonCyan');
         showToast("Ambient noise deactivated.", "success");
         return;
@@ -1086,17 +1231,48 @@
             saveData();
             renderAll();
             showToast("Data restored successfully!", "success");
-          } else {
-            throw new Error("Invalid format");
-          }
-        } catch (err) {
-          showToast("Invalid backup file.", "error");
-        }
+          } else { throw new Error("Invalid format"); }
+        } catch (err) { showToast("Invalid backup file.", "error"); }
       };
       reader.readAsText(e.target.files[0]);
     }
 
-    // --- OPTIMIZED PARTICLE ENGINE ---
+    function toggleCommandPalette() {
+      const cp = document.getElementById('command-palette');
+      cp.classList.toggle('hidden');
+      if (!cp.classList.contains('hidden')) {
+        document.getElementById('cmd-input').focus();
+        renderCommandResults('');
+      }
+    }
+
+    function handleCommandSearch(e) { renderCommandResults(e.target.value.toLowerCase()); }
+
+    function renderCommandResults(query) {
+      const resultsContainer = document.getElementById('cmd-results');
+      resultsContainer.innerHTML = '';
+      const actions = [
+        { name: 'Navigate to Home', icon: 'home', action: () => { switchTab('home'); toggleCommandPalette(); } },
+        { name: 'View Task Database', icon: 'layers', action: () => { switchTab('assignments'); toggleCommandPalette(); } },
+        { name: 'Open Focus Flow', icon: 'crosshair', action: () => { switchTab('focus'); toggleCommandPalette(); } },
+        { name: 'OCR Scan Screenshot', icon: 'scan', action: () => { toggleCommandPalette(); openOCRModal(); } },
+        { name: 'Open Settings', icon: 'settings', action: () => { toggleCommandPalette(); toggleModal('settings-modal'); } }
+      ].filter(a => a.name.toLowerCase().includes(query));
+
+      let html = '';
+      actions.forEach((act, idx) => {
+        html += `<div onclick="executeCmd(${idx})" class="p-2.5 rounded-xl bg-bgDark hover:bg-elevatedDark cursor-pointer flex items-center gap-3 text-sm transition"><i data-lucide="${act.icon}" class="w-4 h-4 text-neonCyan"></i><span>${escapeHTML(act.name)}</span></div>`;
+      });
+      resultsContainer.innerHTML = html || '<div class="p-3 text-center text-xs text-textSecondary">No matching results</div>';
+      lucide.createIcons();
+      window._cmdActions = actions;
+    }
+
+    function executeCmd(idx) {
+      if (window._cmdActions && window._cmdActions[idx]) window._cmdActions[idx].action();
+    }
+
+    // --- HYPER-REACTIVE CINEMATIC PARTICLE ENGINE ---
     function initParticles() {
       const canvas = document.getElementById('particle-canvas');
       const ctx = canvas.getContext('2d');
@@ -1108,7 +1284,7 @@
         canvas.height = window.innerHeight;
       });
 
-      const count = settings.particleMode === 'performance' ? 100 : settings.particleMode === 'cinematic' ? 400 : 220;
+      const count = settings.particleMode === 'performance' ? 140 : settings.particleMode === 'cinematic' ? 500 : 300;
       let particles = [];
       let mouse = { x: null, y: null };
 
@@ -1119,10 +1295,10 @@
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: (Math.random() - 0.5) * 0.4,
-          size: Math.random() * 1.5 + 0.5,
-          color: Math.random() > 0.5 ? 'rgba(0, 240, 255, ' : 'rgba(184, 41, 255, '
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: (Math.random() - 0.5) * 0.6,
+          size: Math.random() * 2 + 0.8,
+          color: Math.random() > 0.4 ? 'rgba(0, 240, 255, ' : 'rgba(184, 41, 255, '
         });
       }
 
@@ -1140,15 +1316,15 @@
             let dx = mouse.x - p.x;
             let dy = mouse.y - p.y;
             let distSq = dx * dx + dy * dy;
-            if (distSq < 14400) { // 120px radius squared
-              p.x -= dx * 0.01;
-              p.y -= dy * 0.01;
+            if (distSq < 22500) { // 150px radius attraction/swirl
+              p.x += dx * 0.02;
+              p.y += dy * 0.02;
             }
           }
 
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fillStyle = p.color + '0.4)';
+          ctx.fillStyle = p.color + '0.6)';
           ctx.fill();
         });
 
