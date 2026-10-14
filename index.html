@@ -541,9 +541,148 @@
 
   <!-- JAVASCRIPT ENGINE -->
   <script>
-    let assignments = JSON.parse(localStorage.getItem('dlos_v4_tasks') || '[]');
-    let stats = JSON.parse(localStorage.getItem('dlos_v4_stats') || '{"focusMinutes":0, "sessions":[]}');
-    let settings = JSON.parse(localStorage.getItem('dlos_v4_settings') || '{"capacity":3.0, "particleMode":"balanced"}');
+        // ===== SAFE STORAGE + HELPERS (OrbitOS step 2a) =====
+    const SCHEMA_VERSION = 2;
+    let loadWarning = '';
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+
+    // A date as YYYY-MM-DD in the user's LOCAL timezone (not UTC)
+    function localDateStr(d = new Date()) {
+      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    }
+
+    function safeParse(key, fallback) {
+      let raw = null;
+      try { raw = localStorage.getItem(key); } catch (e) { return fallback; }
+      if (raw === null) return fallback;
+      try {
+        const val = JSON.parse(raw);
+        return (val !== null && typeof val === 'object') ? val : fallback;
+      } catch (e) {
+        try { localStorage.setItem('dlos_corrupt_' + key, raw); } catch (e2) {}
+        loadWarning = 'Some saved data was unreadable. A copy was kept in this browser.';
+        return fallback;
+      }
+    }
+
+    // IDs end up inside onclick="..." attributes, so keep them to safe characters only
+    function safeId(id) {
+      const s = String(id == null ? '' : id).replace(/[^A-Za-z0-9_-]/g, '');
+      return s || (Date.now().toString() + Math.random().toString(36).slice(2, 7));
+    }
+
+    // Returns "YYYY-MM-DDTHH:mm" in local time, or '' if it can't be read
+    function normalizeDueDate(v) {
+      const s = String(v == null ? '' : v).trim();
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s) && !isNaN(new Date(s).getTime())) return s;
+      const d = new Date(s);
+      if (!s || isNaN(d.getTime())) return '';
+      return `${localDateStr(d)}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+    }
+
+    function normalizeAssignment(a) {
+      if (!a || typeof a !== 'object') return null;
+      const title = String(a.title == null ? '' : a.title).trim();
+      const dueDate = normalizeDueDate(a.dueDate);
+      if (!title || !dueDate) return null;
+      const duration = Number(a.duration);
+      return {
+        id: safeId(a.id),
+        title: title.slice(0, 200),
+        subject: String(a.subject == null ? '' : a.subject).trim().slice(0, 100) || 'General',
+        priority: [1, 2, 3].includes(Number(a.priority)) ? Number(a.priority) : 2,
+        dueDate,
+        duration: isFinite(duration) && duration > 0 ? Math.min(duration, 100) : 1,
+        notes: String(a.notes == null ? '' : a.notes).slice(0, 20000),
+        completed: a.completed === true,
+        subtasks: Array.isArray(a.subtasks)
+          ? a.subtasks.filter(s => s && typeof s === 'object').map(s => ({ title: String(s.title == null ? '' : s.title).slice(0, 200), done: s.done === true }))
+          : []
+      };
+    }
+
+    function normalizeAssignmentList(list) {
+      const seen = new Set();
+      const out = [];
+      let skipped = 0;
+      list.forEach(raw => {
+        const a = normalizeAssignment(raw);
+        if (!a) { skipped++; return; }
+        while (seen.has(a.id)) a.id = a.id + '-' + Math.random().toString(36).slice(2, 5);
+        seen.add(a.id);
+        out.push(a);
+      });
+      return { list: out, skipped };
+    }
+
+    function normalizeStats(s) {
+      const out = { focusMinutes: 0, sessions: [] };
+      if (!s || typeof s !== 'object') return out;
+      if (Array.isArray(s.sessions)) {
+        out.sessions = s.sessions
+          .filter(x => x && typeof x === 'object' && isFinite(Number(x.duration)) && Number(x.duration) > 0 && /^\d{4}-\d{2}-\d{2}$/.test(String(x.date || '')))
+          .map(x => ({
+            date: String(x.date),
+            duration: Number(x.duration),
+            taskId: x.taskId == null ? null : safeId(x.taskId),
+            notes: String(x.notes == null ? '' : x.notes).slice(0, 5000)
+          }));
+      }
+      const fm = Number(s.focusMinutes);
+      out.focusMinutes = isFinite(fm) && fm >= 0 ? fm : out.sessions.reduce((t, x) => t + x.duration, 0);
+      return out;
+    }
+
+    function normalizeSettings(s) {
+      const out = { capacity: 3.0, particleMode: 'balanced' };
+      if (s && typeof s === 'object') {
+        const c = parseFloat(s.capacity);
+        if (isFinite(c) && c > 0 && c <= 24) out.capacity = c;
+        if (['performance', 'balanced', 'cinematic'].includes(s.particleMode)) out.particleMode = s.particleMode;
+      }
+      return out;
+    }
+
+    function loadAllData() {
+      // First run of this version: keep an untouched copy of the old data
+      const meta = safeParse('dlos_v4_meta', {});
+      if ((Number(meta.schemaVersion) || 1) < SCHEMA_VERSION) {
+        try {
+          ['tasks', 'stats', 'settings'].forEach(k => {
+            const raw = localStorage.getItem('dlos_v4_' + k);
+            if (raw !== null && localStorage.getItem('dlos_v4_backup_v1_' + k) === null) {
+              localStorage.setItem('dlos_v4_backup_v1_' + k, raw);
+            }
+          });
+        } catch (e) {}
+      }
+      const rawTasks = safeParse('dlos_v4_tasks', []);
+      const cleaned = normalizeAssignmentList(Array.isArray(rawTasks) ? rawTasks : []);
+      if (cleaned.skipped > 0) {
+        loadWarning = cleaned.skipped + ' saved assignment(s) could not be read and were skipped. A copy of your original data is kept in this browser.';
+      }
+      return {
+        assignments: cleaned.list,
+        stats: normalizeStats(safeParse('dlos_v4_stats', {})),
+        settings: normalizeSettings(safeParse('dlos_v4_settings', {}))
+      };
+    }
+
+    function updateGreeting() {
+      const h = new Date().getHours();
+      const text = h < 5 ? "Up late? Let's make it count."
+        : (h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening') + '. Ready to make progress?';
+      const el = document.getElementById('greeting');
+      if (el) el.textContent = text;
+    }
+
+    const initialData = loadAllData();
+    let assignments = initialData.assignments;
+    let stats = initialData.stats;
+    let settings = initialData.settings;
+    try { localStorage.setItem('dlos_v4_meta', JSON.stringify({ schemaVersion: SCHEMA_VERSION })); } catch (e) {}
+    // ===== END 2a BLOCK =====
     
     let currentFocusId = null;
     let timerInterval = null;
@@ -564,7 +703,9 @@
       initParticles();
       updateStudyTodayNav();
       document.getElementById('setting-capacity').value = settings.capacity;
-      highlightParticleModeBtn(settings.particleMode);
+            highlightParticleModeBtn(settings.particleMode);
+      updateGreeting();
+      if (loadWarning) setTimeout(() => showToast(loadWarning, 'error'), 500);
       renderAll();
 
       window.addEventListener('keydown', (e) => {
@@ -607,8 +748,8 @@
       );
     }
 
-    function updateStudyTodayNav() {
-      const todayStr = new Date().toISOString().split('T')[0];
+        function updateStudyTodayNav() {
+      const todayStr = localDateStr();
       const todayMins = (stats.sessions || []).filter(s => s.date === todayStr).reduce((acc, s) => acc + s.duration, 0);
       document.getElementById('nav-today-study').textContent = `${todayMins}m`;
     }
@@ -752,8 +893,8 @@
     }
 
     function logCompletedSession(mins) {
-      if (mins <= 0) return;
-      const todayStr = new Date().toISOString().split('T')[0];
+            if (mins <= 0) return;
+      const todayStr = localDateStr();
       stats.focusMinutes = (stats.focusMinutes || 0) + mins;
       if (!stats.sessions) stats.sessions = [];
       stats.sessions.push({
@@ -948,7 +1089,7 @@
       for (let i = 0; i < 7; i++) {
         const d = new Date();
         d.setDate(today.getDate() + i);
-        const dateStr = d.toISOString().split('T')[0];
+                const dateStr = localDateStr(d);
         const dayTasks = assignments.filter(a => !a.completed && a.dueDate.startsWith(dateStr));
 
         const col = document.createElement('div');
@@ -1127,8 +1268,8 @@
       document.getElementById('form-duedate').value = task.dueDate;
       document.getElementById('form-duration').value = task.duration;
       document.getElementById('form-notes').value = task.notes || '';
-      document.getElementById('modal-title').textContent = 'Edit Assignment';
-      toggleModal('add-modal');
+            document.getElementById('modal-title').textContent = 'Edit Assignment';
+      document.getElementById('add-modal').classList.remove('hidden');
     }
 
     function toggleComplete(id) {
@@ -1151,10 +1292,16 @@
       }
     }
 
-    function saveData() {
-      localStorage.setItem('dlos_v4_tasks', JSON.stringify(assignments));
-      localStorage.setItem('dlos_v4_stats', JSON.stringify(stats));
-      localStorage.setItem('dlos_v4_settings', JSON.stringify(settings));
+       function saveData() {
+      try {
+        localStorage.setItem('dlos_v4_tasks', JSON.stringify(assignments));
+        localStorage.setItem('dlos_v4_stats', JSON.stringify(stats));
+        localStorage.setItem('dlos_v4_settings', JSON.stringify(settings));
+        return true;
+      } catch (e) {
+        showToast("Couldn't save. Your browser storage may be full or blocked.", "error");
+        return false;
+      }
     }
 
     function getSortedAssignments() {
@@ -1324,21 +1471,43 @@
     }
 
     function importData(e) {
+      const input = e.target;
+      const file = input.files && input.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("That file is too big to be a backup.", "error");
+        input.value = '';
+        return;
+      }
       const reader = new FileReader();
       reader.onload = function(evt) {
         try {
           const parsed = JSON.parse(evt.target.result);
-          if (parsed && Array.isArray(parsed.assignments)) {
-            assignments = parsed.assignments;
-            if (parsed.stats) stats = parsed.stats;
-            if (parsed.settings) settings = parsed.settings;
-            saveData();
-            renderAll();
-            showToast("Data restored successfully!", "success");
-          } else { throw new Error(); }
-        } catch (err) { showToast("Invalid backup file.", "error"); }
+          if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.assignments)) throw new Error('Not a backup file');
+          const cleaned = normalizeAssignmentList(parsed.assignments);
+          const newStats = normalizeStats(parsed.stats);
+          const newSettings = normalizeSettings(parsed.settings);
+          let msg = 'Replace your current data with this backup?\n\n• ' + cleaned.list.length + ' assignment(s)\n• ' + newStats.sessions.length + ' study session(s)';
+          if (cleaned.skipped > 0) msg += '\n\n' + cleaned.skipped + ' item(s) in the file could not be read and will be skipped.';
+          msg += '\n\nYour current data on this device will be replaced. A safety copy of it is kept.';
+          if (!confirm(msg)) { showToast("Import cancelled. Nothing was changed.", "error"); return; }
+          try { localStorage.setItem('dlos_v4_backup_before_import', JSON.stringify({ assignments, stats, settings })); } catch (err) {}
+          assignments = cleaned.list;
+          stats = newStats;
+          settings = { ...newSettings, particleMode: settings.particleMode };
+          saveData();
+          document.getElementById('setting-capacity').value = settings.capacity;
+          renderAll();
+          updateStudyTodayNav();
+          showToast("Data restored successfully!", "success");
+        } catch (err) {
+          showToast("Invalid backup file.", "error");
+        } finally {
+          input.value = '';
+        }
       };
-      reader.readAsText(e.target.files[0]);
+      reader.onerror = function() { showToast("Couldn't read that file.", "error"); input.value = ''; };
+      reader.readAsText(file);
     }
 
     function toggleCommandPalette() {
