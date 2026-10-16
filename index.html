@@ -576,12 +576,12 @@
       <div id="ocr-drop-zone" class="p-8 rounded-2xl border-2 border-dashed border-neonViolet/50 bg-neonViolet/5 text-center space-y-4 relative overflow-hidden">
         <i data-lucide="camera" class="w-12 h-12 text-neonViolet mx-auto animate-pulse"></i>
         <div>
-          <div class="font-bold text-sm text-textPrimary">Upload Assignment Screenshot</div>
-          <div class="text-xs text-textSecondary mt-1">Supports PNG, JPG, WEBP • Accurate deadline & instruction extraction</div>
+          <div class="font-bold text-sm text-textPrimary">Upload Assignment Screenshot(s)</div>
+          <div class="text-xs text-textSecondary mt-1">Supports PNG, JPG, WEBP • Up to 10 assignments at once. You check everything before it's saved</div>
         </div>
         <label class="inline-block px-6 py-3 rounded-xl bg-neonViolet text-white font-bold text-xs cursor-pointer hover:opacity-90 shadow-lg shadow-neonViolet/30 transition">
           Browse Image File
-          <input type="file" id="ocr-file-input" accept="image/*" onchange="handleOCRFileUpload(event)" class="hidden">
+          <input type="file" id="ocr-file-input" accept="image/*" multiple onchange="handleOCRFileUpload(event)" class="hidden">
         </label>
         <div id="ocr-progress-status" class="text-xs font-mono font-bold text-neonCyan hidden">Scanning screenshot...</div>
       </div>
@@ -638,6 +638,14 @@
   </div>
 
   <!-- SETTINGS MODAL -->
+  <div id="ocr-review-modal" class="hidden fixed inset-0 bg-bgDark/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 space-y-4 animate-modal-pop max-h-[95vh] overflow-y-auto border-neonCyan/40">
+      <div class="flex justify-between items-center pb-3 border-b border-white/5"><div><h3 class="font-display text-xl font-bold text-neonCyan">Check what was found</h3><p class="text-xs text-textSecondary mt-0.5">Nothing is saved until you press Add. Fix anything that looks wrong.</p></div><button onclick="toggleModal('ocr-review-modal')" class="text-textSecondary hover:text-white" aria-label="Close"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+      <div id="ocr-drafts-list" class="space-y-3 max-h-[55vh] overflow-y-auto pr-1"></div>
+      <div class="flex justify-between pt-2 border-t border-white/5"><button onclick="toggleModal('ocr-review-modal')" class="px-4 py-2.5 rounded-xl bg-bgDark text-xs font-semibold text-textSecondary hover:text-white">Cancel</button><button onclick="commitOCRDrafts()" id="ocr-commit-btn" class="px-6 py-3 rounded-xl bg-neonCyan text-bgDark font-bold text-xs">Add selected</button></div>
+    </div>
+  </div>
+
   <div id="settings-modal" class="hidden fixed inset-0 bg-bgDark/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="glass-panel w-full max-w-lg rounded-2xl p-6 space-y-5 animate-modal-pop max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center pb-3 border-b border-white/5">
@@ -653,7 +661,6 @@
           <div class="flex justify-between text-textSecondary"><span>All time</span><span id="ins-all" class="text-neonViolet font-bold">0m</span></div>
         </div>
         <div class="space-y-2"><div class="font-bold text-textPrimary">Hours you can study each day</div><div id="avail-grid" class="grid grid-cols-7 gap-1.5"></div><p class="text-[10px] text-textSecondary">Your plan fits work into these hours.</p></div>
-        <div class="space-y-2"><div class="font-bold text-textPrimary">Particle effects</div><div class="grid grid-cols-3 gap-2"><button onclick="setParticleMode('performance')" id="mode-performance">Performance</button><button onclick="setParticleMode('balanced')" id="mode-balanced">Balanced</button><button onclick="setParticleMode('cinematic')" id="mode-cinematic">Cinematic</button></div></div>
         <div class="space-y-2 pt-2 border-t border-white/5">
           <label class="block text-textSecondary font-semibold">Data Backup</label>
           <div class="grid grid-cols-2 gap-3">
@@ -1368,40 +1375,6 @@
     }
 
     // --- SCREENSHOT SCANNING ---
-    async function handleOCRFileUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const status = document.getElementById('ocr-progress-status');
-      status.classList.remove('hidden');
-      status.textContent = "Scanning screenshot...";
-
-      try {
-        const worker = await Tesseract.createWorker('eng');
-        const ret = await worker.recognize(file);
-        await worker.terminate();
-
-        const rawText = ret.data.text || 'Scanned Assignment';
-        assignments.push({
-          id: Date.now().toString(),
-          title: rawText.split('\n')[0] || 'Scanned Homework',
-          subject: 'General',
-          priority: 2,
-          dueDate: `${localDateStr()}T23:59`,
-          duration: 1.0,
-          notes: rawText,
-          completed: false
-        });
-        saveData();
-        toggleModal('ocr-modal');
-        renderAll();
-        showToast("Successfully scanned & added assignment!", "success");
-      } catch (err) {
-        showToast("OCR scanning failed.", "error");
-      } finally {
-        status.classList.add('hidden');
-      }
-    }
-
     function saveData() {
       try {
         localStorage.setItem('dlos_v5_tasks', JSON.stringify(assignments));
@@ -1580,7 +1553,7 @@
 
     // ===== SETTINGS, PARKED THOUGHTS, STATS, PLANNER (OrbitOS batch 1) =====
     function normalizeSettings(s) {
-      const o = { particleMode: 'balanced', volume: 0.5, availability: [3, 3, 3, 3, 3, 3, 3] };
+      const o = { particleMode: 'cinematic', volume: 0.5, availability: [3, 3, 3, 3, 3, 3, 3] };
       if (s && typeof s === 'object') {
         if (['performance', 'balanced', 'cinematic'].includes(s.particleMode)) o.particleMode = s.particleMode;
         const v = Number(s.volume); if (isFinite(v) && v >= 0 && v <= 1) o.volume = v;
@@ -1719,6 +1692,119 @@
     }
     function setVolume(v) { settings.volume = Math.min(1, Math.max(0, Number(v) || 0)); if (AU.gain) AU.gain.gain.value = settings.volume; saveData(); }
 
+    // ===== SCREENSHOT SCANNING: read text, find the real deadline, let the user confirm =====
+    const MON_ABBR = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    const TZ_ABBR = { PDT: -420, PST: -480, MDT: -360, MST: -420, CDT: -300, CST: -360, EDT: -240, EST: -300, UTC: 0, GMT: 0 };
+    const DUE_LABEL = '(?<![a-z])(?:due(?:\\s*date)?|deadline)';
+    const DUE_SRC = DUE_LABEL + '\\s*[:\\-–—]*\\s*(?:on\\s*)?(?:(?:' + MON_ABBR.join('|') + ')[a-z]*\\.?\\s*\\d|\\d{1,2}[\\/.\\-]\\d{1,2}[\\/.\\-]\\d{2,4})';
+
+    // Finds "<label> <date> <time> <timezone>" in text. Returns null if the label+date isn't there.
+    function scanWhen(text, label, now) {
+      const base = label + '[\\s:\\-–—]*(?:on\\s*)?';
+      let mo, d, y = null, m = new RegExp(base + '(' + MON_ABBR.join('|') + ')[a-z]*\\.?\\s*(\\d{1,2})(?:st|nd|rd|th)?(?:\\s*,?\\s*(\\d{4}))?', 'i').exec(text);
+      if (m) { mo = MON_ABBR.indexOf(m[1].toLowerCase()); d = +m[2]; y = m[3] ? +m[3] : null; }
+      else {
+        m = new RegExp(base + '(\\d{1,2})[\\/.\\-](\\d{1,2})[\\/.\\-](\\d{4}|\\d{2})', 'i').exec(text);
+        if (!m) return null;
+        const a = +m[1], b = +m[2]; y = +m[3] < 100 ? 2000 + +m[3] : +m[3];
+        if (a > 12) { d = a; mo = b - 1; } else if (b > 12 || a === b) { mo = a - 1; d = b; }
+        else return { hint: `"${m[0].trim()}" could be ${a}/${b} as month/day or as day/month. Please enter the date yourself.` };
+      }
+      let yearAssumed = false;
+      if (y === null) { y = now.getFullYear(); yearAssumed = true; if (new Date(y, mo, d) < new Date(now.getTime() - 30 * 864e5)) y++; }
+      if (new Date(Date.UTC(y, mo, d)).getUTCDate() !== d) return { hint: 'The date found looks invalid. Please enter it yourself.' };
+      const rest = text.slice(m.index + m[0].length, m.index + m[0].length + 48);
+      let h = null, mi = 0, used = 0, tm = /^[\s,\-–—@]*(?:at|by)?\s*(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m/i.exec(rest);
+      if (tm) { const hh = +tm[1]; if (hh >= 1 && hh <= 12) { h = hh % 12 + (tm[3].toLowerCase() === 'p' ? 12 : 0); mi = tm[2] ? +tm[2] : 0; used = tm[0].length; } }
+      else if ((tm = /^[\s,\-–—@]*(?:at|by)?\s*(\d{1,2}):(\d{2})(?!\s*[ap]\.?m)/i.exec(rest)) && +tm[1] <= 24 && +tm[2] < 60) { h = +tm[1]; mi = +tm[2]; used = tm[0].length; }
+      if (h === null) return { hint: `Found the date (${MON_ABBR[mo]} ${d}) but no time. Please add the time.` };
+      let off = null;
+      const zm = /^\s*(?:(?:GMT|UTC)\s*([+-])\s*(\d{1,2})(?::?(\d{2}))?|(PDT|PST|MDT|MST|CDT|CST|EDT|EST|UTC|GMT)(?![A-Za-z]))/i.exec(rest.slice(used));
+      if (zm) off = zm[4] ? TZ_ABBR[zm[4].toUpperCase()] : (zm[1] === '-' ? -1 : 1) * (+zm[2] * 60 + (zm[3] ? +zm[3] : 0));
+      const when = off !== null ? new Date(Date.UTC(y, mo, d, h, mi) - off * 60000) : new Date(y, mo, d, h, mi);
+      return { when, tzKnown: off !== null, yearAssumed };
+    }
+
+    function parseBlock(text, now) {
+      const flat = text.replace(/\s+/g, ' ');
+      const due = scanWhen(flat, DUE_LABEL, now), mine = scanWhen(flat, 'your\\s*time', now); // "Your time" = deadline in school time
+      const review = []; let hint = '', when = null;
+      const pick = due && due.when ? due : (mine && mine.when ? mine : null);
+      if (pick) {
+        when = pick.when;
+        if (due && due.when && mine && mine.when && Math.abs(due.when - mine.when) > 60000) { review.push('dueDate'); hint = 'The screenshot shows two different deadlines. Check which one is right.'; }
+        else if (!pick.tzKnown) { review.push('dueDate'); hint = 'No timezone was shown, so your local time was assumed.'; }
+        else if (pick.yearAssumed) { review.push('dueDate'); hint = 'No year was shown, so the nearest likely year was used.'; }
+        else if (pick === mine) { review.push('dueDate'); hint = 'No readable "Due" line, so the "Your time" deadline was used.'; }
+      } else { review.push('dueDate'); hint = (due && due.hint) || (mine && mine.hint) || 'No due date was found. Please enter it yourself.'; }
+      if ((flat.match(new RegExp(DUE_SRC, 'gi')) || []).length > 1) { if (!review.includes('dueDate')) review.push('dueDate'); hint = 'More than one due date was found here, so several assignments may be mixed together. Check the details, or scan fewer at a time.'; }
+      const first = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean)[0] || '';
+      let title = first.replace(new RegExp('\\s*(?:' + DUE_LABEL + '\\b|(?<![a-z])(?:posted|assigned|created|available)(?![a-z])).*$', 'i'), '').replace(/[\s:\-–—,]+$/, '').slice(0, 150);
+      if (!title) { title = 'Scanned assignment'; review.push('title'); }
+      return { title, subject: 'General', dueDate: when ? `${localDateStr(when)}T${pad2(when.getHours())}:${pad2(when.getMinutes())}` : '', duration: 1, priority: 2, notes: text.trim(), review, hint, selected: true };
+    }
+
+    function parseScannedText(raw, now = new Date()) {
+      const lines = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+      const DUE = new RegExp(DUE_SRC, 'i');
+      const idx = lines.map((l, i) => DUE.test(l) ? i : -1).filter(i => i >= 0);
+      if (idx.length < 2) return [parseBlock(raw, now)];
+      const starts = idx.map(i => (/^due/i.test(lines[i]) && i > 0) ? i - 1 : i); // title is the line above its "Due" line
+      return starts.map((s, j) => parseBlock(lines.slice(s, j + 1 < starts.length ? starts[j + 1] : lines.length).join('\n'), now));
+    }
+
+    const OCR_MAX = 10;
+    function limitDrafts(list) { return { list: list.slice(0, OCR_MAX), extra: Math.max(0, list.length - OCR_MAX) }; }
+    function markDuplicates(drafts, existing) {
+      const key = (t, d) => t.trim().toLowerCase() + '|' + d;
+      const have = new Set(existing.map(a => key(a.title, a.dueDate)));
+      drafts.forEach(d => {
+        if (!d.dueDate) return;
+        if (have.has(key(d.title, d.dueDate))) { d.selected = false; d.review.push('duplicate'); d.hint = 'This looks like it is already in your list, so it is unticked.'; }
+        else have.add(key(d.title, d.dueDate));
+      });
+      return drafts;
+    }
+
+    let ocrDrafts = [], ocrExtra = 0;
+    async function handleOCRFileUpload(e) {
+      const files = Array.from(e.target.files || []).slice(0, 6); if (!files.length) return;
+      const status = document.getElementById('ocr-progress-status'); status.classList.remove('hidden');
+      let worker = null, all = [];
+      try {
+        worker = await Tesseract.createWorker('eng');
+        for (let i = 0; i < files.length; i++) {
+          status.textContent = files.length > 1 ? 'Reading screenshot ' + (i + 1) + ' of ' + files.length + '...' : 'Reading screenshot...';
+          const text = ((await worker.recognize(files[i])).data.text || '').trim();
+          if (text) all = all.concat(parseScannedText(text));
+        }
+        if (!all.length) { showToast('No text found in that image.', 'error'); return; }
+        const lim = limitDrafts(all); ocrDrafts = markDuplicates(lim.list, assignments); ocrExtra = lim.extra;
+        renderOCRReview(); toggleModal('ocr-modal'); toggleModal('ocr-review-modal');
+      } catch (err) { showToast('Scanning failed. Try a clearer screenshot.', 'error'); }
+      finally { if (worker) { try { await worker.terminate(); } catch (x) {} } status.classList.add('hidden'); e.target.value = ''; }
+    }
+    function setAllOCR(v) { ocrDrafts.forEach(d => { d.selected = v; }); renderOCRReview(); }
+    function updateOCRCount() { const b = document.getElementById('ocr-commit-btn'); if (b) b.textContent = 'Add ' + ocrDrafts.filter(d => d.selected).length + ' selected'; }
+    function renderOCRReview() {
+      const head = `<div class="flex items-center justify-between text-xs"><span class="text-textSecondary">Found ${ocrDrafts.length} assignment(s)${ocrExtra ? '. Only the first ' + OCR_MAX + ' are shown; scan the other ' + ocrExtra + ' separately' : ''}</span><span class="flex gap-3"><button onclick="setAllOCR(true)" class="text-neonCyan hover:underline">Select all</button><button onclick="setAllOCR(false)" class="text-textSecondary hover:underline">None</button></span></div>`;
+      document.getElementById('ocr-drafts-list').innerHTML = head + ocrDrafts.map((d, i) => `<div class="glass-panel p-4 rounded-2xl border ${d.review.length ? 'border-statusWarning/40' : 'border-neonCyan/30'} space-y-2 text-xs">
+        <label class="flex items-center gap-2 font-bold text-neonCyan"><input type="checkbox" ${d.selected ? 'checked' : ''} onchange="ocrDrafts[${i}].selected = this.checked; updateOCRCount()" class="accent-neonCyan"> Add this assignment</label>
+        <input type="text" value="${escapeHTML(d.title)}" oninput="ocrDrafts[${i}].title = this.value" class="w-full px-3 py-2 rounded-xl bg-bgDark border border-white/10 text-textPrimary" aria-label="Title">
+        <div class="grid grid-cols-2 gap-2"><input type="text" value="${escapeHTML(d.subject)}" oninput="ocrDrafts[${i}].subject = this.value" class="px-3 py-2 rounded-xl bg-bgDark border border-white/10 text-textPrimary" aria-label="Subject"><input type="number" step="0.5" min="0.5" value="${d.duration}" oninput="ocrDrafts[${i}].duration = parseFloat(this.value) || 1" class="px-3 py-2 rounded-xl bg-bgDark border border-white/10 text-textPrimary" aria-label="Estimated hours"></div>
+        <input type="datetime-local" value="${escapeHTML(d.dueDate)}" oninput="ocrDrafts[${i}].dueDate = this.value" class="w-full px-3 py-2 rounded-xl bg-bgDark border ${d.review.includes('dueDate') ? 'border-statusWarning' : 'border-white/10'} text-textPrimary" aria-label="Due date and time">
+        ${d.hint ? `<div class="text-statusWarning">⚠ ${escapeHTML(d.hint)}</div>` : ''}
+        <details><summary class="cursor-pointer text-textSecondary">Instructions saved with it</summary><div class="mt-1 whitespace-pre-line text-textSecondary max-h-32 overflow-y-auto">${escapeHTML(d.notes)}</div></details></div>`).join('');
+      updateOCRCount();
+    }
+    function commitOCRDrafts() {
+      const picked = ocrDrafts.filter(d => d.selected);
+      if (!picked.length) { showToast('Nothing selected.', 'error'); return; }
+      if (picked.some(d => !d.title.trim() || !d.dueDate || isNaN(new Date(d.dueDate)))) { showToast('Add a title and due date to every selected assignment.', 'error'); return; }
+      picked.forEach(d => assignments.push({ id: safeId('s' + Date.now() + Math.random().toString(36).slice(2, 6)), title: d.title.trim().slice(0, 200), subject: d.subject.trim() || 'General', priority: 2, dueDate: d.dueDate, duration: d.duration > 0 ? d.duration : 1, notes: d.notes, completed: false, subtasks: [] }));
+      saveData(); renderAll(); toggleModal('ocr-review-modal'); showToast('Added ' + picked.length + ' assignment(s).');
+    }
+
     // ===== PARTICLES: one loop, listeners bound once =====
     const FX = { raf: 0, parts: [], ripples: [], mx: null, my: null, bound: false, rt: 0 };
     const FX_COUNT = { performance: 70, balanced: 150, cinematic: 280 };
@@ -1726,7 +1812,7 @@
     function buildParticles() {
       const c = document.getElementById('particle-canvas'); c.width = innerWidth; c.height = innerHeight;
       const slow = (navigator.hardwareConcurrency || 8) < 4 ? 0.6 : 1;
-      const n = Math.round(FX_COUNT[settings.particleMode] * slow * Math.min(1.5, Math.max(0.5, innerWidth * innerHeight / 921600)));
+      const n = Math.round(FX_COUNT.cinematic * slow * Math.min(1.5, Math.max(0.5, innerWidth * innerHeight / 921600)));
       const cols = ['0,240,255', '184,41,255', '255,255,255'];
       FX.parts = Array.from({ length: n }, () => { const x = Math.random() * c.width, y = Math.random() * c.height, r = Math.random();
         return { hx: x, hy: y, x, y, vx: 0, vy: 0, r: Math.random() * 1.6 + 0.6, c: cols[r < 0.45 ? 0 : r < 0.8 ? 1 : 2] }; });
