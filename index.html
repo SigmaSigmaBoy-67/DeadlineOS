@@ -116,6 +116,28 @@
 
   <div id="toast-container" class="fixed top-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
+  <!-- WELCOME ONBOARDING MODAL -->
+  <div id="welcome-modal" class="hidden fixed inset-0 bg-bgDark/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-lg rounded-3xl p-8 space-y-6 animate-modal-pop border-neonCyan/40 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-neonCyan/10 border border-neonCyan/30 flex items-center justify-center mx-auto text-neonCyan">
+        <i data-lucide="compass" class="w-8 h-8"></i>
+      </div>
+      <div>
+        <h2 class="font-display text-2xl font-bold">Welcome to OrbitOS</h2>
+        <p class="text-textSecondary text-sm mt-2">Let's get your schoolwork organized, deadlines tracked, and deep work sessions locked in.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        <button onclick="toggleModal('welcome-modal'); toggleModal('add-modal');" class="py-3 px-4 rounded-xl bg-neonCyan text-bgDark font-bold text-xs hover:opacity-90 transition">
+          Add First Assignment
+        </button>
+        <button onclick="toggleModal('welcome-modal'); openOCRModal();" class="py-3 px-4 rounded-xl bg-elevatedDark border border-neonViolet/40 text-neonViolet font-bold text-xs hover:bg-neonViolet/10 transition">
+          Screenshot Scanning
+        </button>
+      </div>
+      <button onclick="dismissWelcome()" class="text-xs text-textSecondary hover:text-textPrimary underline">Skip for now</button>
+    </div>
+  </div>
+
   <!-- COMMAND PALETTE -->
   <div id="command-palette" class="hidden fixed inset-0 bg-bgDark/80 backdrop-blur-md z-50 flex items-start justify-center pt-24 p-4">
     <div class="glass-panel w-full max-w-lg rounded-2xl p-4 space-y-3 animate-modal-pop shadow-2xl border-neonCyan/30">
@@ -137,7 +159,7 @@
       <div>
         <div class="flex items-center gap-2">
           <span class="font-display font-bold text-2xl tracking-wider">ORBIT<span class="text-neonCyan">OS</span></span>
-          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-neonCyan/10 text-neonCyan border border-neonCyan/30">v4.1</span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-neonCyan/10 text-neonCyan border border-neonCyan/30">v4.2</span>
         </div>
         <div class="text-xs text-textSecondary mt-0.5">Studied today: <span id="nav-today-study" class="text-neonCyan font-bold">0m</span></div>
       </div>
@@ -304,6 +326,14 @@
           </div>
         </div>
 
+        <!-- Assignment Selector for Deep Work -->
+        <div class="bg-bgDark p-3 rounded-2xl border border-white/5 flex items-center gap-3">
+          <span class="text-xs font-semibold text-textSecondary shrink-0">Target Task:</span>
+          <select id="dw-task-selector" onchange="selectDeepWorkTask(this.value)" class="w-full bg-elevatedDark text-textPrimary text-xs px-3 py-2 rounded-xl border border-white/10 outline-none focus:border-neonCyan">
+            <option value="">General Session (No specific task)</option>
+          </select>
+        </div>
+
         <div class="flex flex-wrap gap-2 justify-center bg-bgDark p-2 rounded-2xl border border-white/5">
           <button onclick="setTimerPreset('quick', 25, 5)" id="preset-quick" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-neonViolet text-white">Quick Focus (25m)</button>
           <button onclick="setTimerPreset('deep', 50, 10)" id="preset-deep" class="px-4 py-2 rounded-xl text-xs font-bold transition text-textSecondary hover:text-white">Deep Work (50m)</button>
@@ -377,6 +407,28 @@
     </section>
 
   </main>
+
+  <!-- SESSION SUMMARY MODAL -->
+  <div id="session-summary-modal" class="hidden fixed inset-0 bg-bgDark/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-md rounded-3xl p-6 space-y-5 animate-modal-pop border-neonCyan/40 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-neonCyan/10 border border-neonCyan/30 flex items-center justify-center mx-auto text-neonCyan">
+        <i data-lucide="award" class="w-7 h-7"></i>
+      </div>
+      <div>
+        <h3 class="font-display text-2xl font-bold">Session Complete</h3>
+        <p class="text-xs text-textSecondary mt-1">Great focus! Here is your session recap.</p>
+      </div>
+      <div class="bg-bgDark p-4 rounded-2xl text-left space-y-2 text-xs">
+        <div class="flex justify-between"><span class="text-textSecondary">Study Time:</span> <span id="summary-time" class="font-bold text-neonCyan">0 mins</span></div>
+        <div class="flex justify-between"><span class="text-textSecondary">Target Assignment:</span> <span id="summary-task" class="font-bold text-textPrimary">None</span></div>
+        <div class="flex justify-between"><span class="text-textSecondary">Checklist Progress:</span> <span id="summary-checklist" class="font-bold text-neonViolet">0/0 steps</span></div>
+      </div>
+      <div class="flex flex-col gap-2 pt-2">
+        <button onclick="closeSummaryAndContinue()" class="py-3 rounded-xl bg-neonViolet text-white font-bold text-xs hover:opacity-90 transition">Continue Studying</button>
+        <button onclick="closeSummaryAndHome()" class="py-3 rounded-xl bg-elevatedDark border border-white/10 text-textSecondary hover:text-white text-xs font-semibold transition">Back to Home</button>
+      </div>
+    </div>
+  </div>
 
   <!-- WEEKLY CALENDAR MODAL -->
   <div id="calendar-modal" class="hidden fixed inset-0 bg-bgDark/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
@@ -484,7 +536,10 @@
           </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-textSecondary mb-1">Instructions / Notes</label>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-xs font-semibold text-textSecondary">Instructions / Subtask Template</label>
+            <button type="button" onclick="applyEssayTemplate()" class="text-[10px] text-neonViolet hover:underline">Apply Essay Template</button>
+          </div>
           <textarea id="form-notes" placeholder="Additional details or instructions..." class="w-full px-4 py-2.5 rounded-xl bg-bgDark border border-white/10 text-sm focus:border-neonCyan outline-none h-20 resize-none"></textarea>
         </div>
         <div class="flex justify-end gap-3 pt-2">
@@ -513,6 +568,7 @@
           <div class="font-bold text-textPrimary">Study Insights (This Week)</div>
           <div class="flex justify-between text-textSecondary"><span>Total Study Time:</span> <span id="insight-time" class="text-neonCyan font-bold">0 mins</span></div>
           <div class="flex justify-between text-textSecondary"><span>Completed Assignments:</span> <span id="insight-completed" class="text-neonViolet font-bold">0</span></div>
+          <div id="backup-reminder-box" class="text-[10px] text-statusWarning pt-1"></div>
         </div>
 
         <div class="space-y-2 pt-2 border-t border-white/5">
@@ -543,11 +599,12 @@
   <!-- JAVASCRIPT ENGINE -->
   <script>
     let assignments = JSON.parse(localStorage.getItem('dlos_v5_tasks') || localStorage.getItem('dlos_v4_tasks') || '[]');
-    let stats = JSON.parse(localStorage.getItem('dlos_v5_stats') || localStorage.getItem('dlos_v4_stats') || '{"focusMinutes":0, "sessions":[]}');
+    let stats = JSON.parse(localStorage.getItem('dlos_v5_stats') || localStorage.getItem('dlos_v4_stats') || '{"focusMinutes":0, "sessions":[], "lastBackup": null}');
     let settings = JSON.parse(localStorage.getItem('dlos_v5_settings') || localStorage.getItem('dlos_v4_settings') || '{"capacity":3.0, "particleMode":"balanced"}');
     
     let currentFocusId = null;
     let timerInterval = null;
+    let timerTargetTime = null;
     let totalSeconds = 25 * 60;
     let remainingSeconds = 25 * 60;
     let isTimerRunning = false;
@@ -564,8 +621,12 @@
       lucide.createIcons();
       initParticles();
       updateStudyTodayNav();
+      checkWelcomeModal();
+      checkBackupReminder();
       document.getElementById('setting-capacity').value = settings.capacity;
       highlightParticleModeBtn(settings.particleMode);
+      populateDeepWorkTaskSelector();
+      recoverActiveTimer();
       renderAll();
 
       window.addEventListener('keydown', (e) => {
@@ -605,6 +666,31 @@
       return str.toString().replace(/[&<>'"]/g, 
         tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
       );
+    }
+
+    function checkWelcomeModal() {
+      if (!localStorage.getItem('orbitos_welcomed')) {
+        document.getElementById('welcome-modal').classList.remove('hidden');
+      }
+    }
+
+    function dismissWelcome() {
+      localStorage.setItem('orbitos_welcomed', 'true');
+      document.getElementById('welcome-modal').classList.add('hidden');
+    }
+
+    function checkBackupReminder() {
+      const box = document.getElementById('backup-reminder-box');
+      if (!stats.lastBackup) {
+        box.textContent = "Reminder: You haven't exported a JSON backup yet.";
+        return;
+      }
+      const daysAgo = Math.floor((Date.now() - new Date(stats.lastBackup).getTime()) / (1000 * 60 * 60 * 24));
+      if (daysAgo > 7) {
+        box.textContent = `Reminder: Last backup was ${daysAgo} days ago. Export soon!`;
+      } else {
+        box.textContent = "Backup status: Up to date.";
+      }
     }
 
     function updateStudyTodayNav() {
@@ -650,8 +736,18 @@
       document.getElementById('ocr-file-input').value = '';
     }
 
-    function initDeepWorkWorkspace() {
-      const task = assignments.find(a => a.id === currentFocusId);
+    function populateDeepWorkTaskSelector() {
+      const sel = document.getElementById('dw-task-selector');
+      sel.innerHTML = '<option value="">General Session (No specific task)</option>';
+      assignments.filter(a => !a.completed).forEach(a => {
+        sel.innerHTML += `<option value="${a.id}">${escapeHTML(a.title)} (${escapeHTML(a.subject)})</option>`;
+      });
+      if (currentFocusId) sel.value = currentFocusId;
+    }
+
+    function selectDeepWorkTask(id) {
+      currentFocusId = id || null;
+      const task = assignments.find(a => a.id === id);
       if (task) {
         document.getElementById('dw-active-task-label').textContent = `Target: ${task.subject}`;
         document.getElementById('dw-task-title').textContent = task.title;
@@ -660,6 +756,18 @@
         document.getElementById('dw-active-task-label').textContent = "General Focus Session";
         document.getElementById('dw-task-title').textContent = "Deep Work Environment";
         sessionChecklist = [];
+      }
+      renderDeepWorkChecklist();
+    }
+
+    function initDeepWorkWorkspace() {
+      populateDeepWorkTaskSelector();
+      const task = assignments.find(a => a.id === currentFocusId);
+      if (task) {
+        document.getElementById('dw-task-selector').value = task.id;
+        document.getElementById('dw-active-task-label').textContent = `Target: ${task.subject}`;
+        document.getElementById('dw-task-title').textContent = task.title;
+        sessionChecklist = (task.subtasks || []).map(st => ({ ...st }));
       }
       renderDeepWorkChecklist();
       renderParkingLot();
@@ -700,19 +808,29 @@
       document.getElementById('timer-btn-text').textContent = 'Pause';
       document.getElementById('timer-status-text').textContent = 'In Progress';
 
+      if (timerMode !== 'stopwatch') {
+        timerTargetTime = Date.now() + (remainingSeconds * 1000);
+        localStorage.setItem('orbitos_timer_target', timerTargetTime);
+        localStorage.setItem('orbitos_timer_total', totalSeconds);
+        localStorage.setItem('orbitos_timer_task', currentFocusId || '');
+      }
+
       timerInterval = setInterval(() => {
         if (timerMode === 'stopwatch') {
           remainingSeconds++;
           updateTimerDisplay();
         } else {
-          if (remainingSeconds > 0) {
-            remainingSeconds--;
-            updateTimerDisplay();
-          } else {
+          const now = Date.now();
+          remainingSeconds = Math.max(0, Math.ceil((timerTargetTime - now) / 1000));
+          updateTimerDisplay();
+
+          if (remainingSeconds <= 0) {
             pauseTimer();
+            localStorage.removeItem('orbitos_timer_target');
             playChime();
-            logCompletedSession(Math.round(totalSeconds / 60));
-            showToast("Deep Work session completed successfully!", "success");
+            const workedMins = Math.round(totalSeconds / 60);
+            logCompletedSession(workedMins);
+            showSessionSummary(workedMins);
             resetTimer();
           }
         }
@@ -722,12 +840,14 @@
     function pauseTimer() {
       isTimerRunning = false;
       clearInterval(timerInterval);
+      localStorage.removeItem('orbitos_timer_target');
       document.getElementById('timer-btn-text').textContent = 'Resume';
       document.getElementById('timer-status-text').textContent = 'Paused';
     }
 
     function resetTimer() {
       pauseTimer();
+      localStorage.removeItem('orbitos_timer_target');
       if (timerMode === 'stopwatch') {
         remainingSeconds = 0;
         document.getElementById('timer-display').textContent = "00:00";
@@ -739,14 +859,31 @@
       document.getElementById('timer-status-text').textContent = 'Ready';
     }
 
+    function recoverActiveTimer() {
+      const target = localStorage.getItem('orbitos_timer_target');
+      if (target) {
+        const targetTime = parseInt(target, 10);
+        const now = Date.now();
+        if (targetTime > now) {
+          timerTargetTime = targetTime;
+          totalSeconds = parseInt(localStorage.getItem('orbitos_timer_total') || '1500', 10);
+          currentFocusId = localStorage.getItem('orbitos_timer_task') || null;
+          remainingSeconds = Math.ceil((targetTime - now) / 1000);
+          startTimer();
+          showToast("Restored active Deep Work session.", "success");
+        } else {
+          localStorage.removeItem('orbitos_timer_target');
+        }
+      }
+    }
+
     function finishSessionEarly() {
       const workedMins = timerMode === 'stopwatch' ? Math.round(remainingSeconds / 60) : Math.round((totalSeconds - remainingSeconds) / 60);
       if (workedMins > 0) {
         logCompletedSession(workedMins);
-        showToast(`Session logged: ${workedMins} mins studied.`, "success");
+        showSessionSummary(workedMins);
       }
       resetTimer();
-      switchTab('home');
     }
 
     function logCompletedSession(mins) {
@@ -762,6 +899,26 @@
       });
       saveData();
       updateStudyTodayNav();
+    }
+
+    function showSessionSummary(mins) {
+      document.getElementById('summary-time').textContent = `${mins} mins`;
+      const task = assignments.find(a => a.id === currentFocusId);
+      document.getElementById('summary-task').textContent = task ? task.title : 'General Session';
+      const doneSteps = sessionChecklist.filter(s => s.done).length;
+      document.getElementById('summary-checklist').textContent = `${doneSteps}/${sessionChecklist.length} steps`;
+      toggleModal('session-summary-modal');
+    }
+
+    function closeSummaryAndContinue() {
+      toggleModal('session-summary-modal');
+      resetTimer();
+    }
+
+    function closeSummaryAndHome() {
+      toggleModal('session-summary-modal');
+      resetTimer();
+      switchTab('home');
     }
 
     function updateTimerDisplay() {
@@ -815,6 +972,12 @@
       sessionChecklist.push({ title: input.value.trim(), done: false });
       input.value = '';
       renderDeepWorkChecklist();
+    }
+
+    function applyEssayTemplate() {
+      const notes = document.getElementById('form-notes');
+      notes.value = "Essay Template:\n- Outline & Thesis\n- First Draft\n- Revision & Editing\n- Final Proofread";
+      showToast("Applied essay subtask template.", "success");
     }
 
     function renderParkingLot() {
@@ -1163,6 +1326,7 @@
       renderAssignments();
       renderDailyStudyPlan();
       updateStudyInsights();
+      populateDeepWorkTaskSelector();
     }
 
     function renderHome() {
@@ -1277,6 +1441,7 @@
       const completedCount = assignments.filter(a => a.completed).length;
       document.getElementById('insight-time').textContent = `${totalMins} mins`;
       document.getElementById('insight-completed').textContent = completedCount;
+      checkBackupReminder();
     }
 
     function updateCapacitySetting(e) {
@@ -1304,14 +1469,17 @@
     }
 
     function exportData() {
+      stats.lastBackup = new Date().toISOString();
+      saveData();
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ assignments, stats, settings }));
       const dl = document.createElement('a');
       dl.setAttribute("href", dataStr);
-      dl.setAttribute("download", `OrbitOS_Backup.json`);
+      dl.setAttribute("download", `OrbitOS_Backup_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(dl);
       dl.click();
       dl.remove();
-      showToast("Backup exported!", "success");
+      showToast("Backup exported successfully!", "success");
+      updateStudyInsights();
     }
 
     function importData(e) {
@@ -1339,7 +1507,6 @@
     }
 
     function handleCommandSearch(e) {
-      const q = e.target.value.toLowerCase();
       const res = document.getElementById('cmd-results');
       res.innerHTML = `
         <div onclick="switchTab('home'); toggleCommandPalette();" class="p-2.5 rounded-xl bg-bgDark hover:bg-elevatedDark cursor-pointer text-sm">Go to Home</div>
