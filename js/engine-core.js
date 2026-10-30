@@ -2,6 +2,7 @@
 /* DeadlineOS — Engine Part 1a: state, storage, date helpers, navigation */
 const $ = id => document.getElementById(id);
 const TIMER_KEY = 'deadlineos_timer_v1';
+const TAB_IDS = ['home', 'assignments', 'focus', 'arena'];
 
 function safeParse(keys, fallback) {
   for (const key of keys) {
@@ -66,17 +67,25 @@ function saveData() {
   } catch (e) { showToast('Storage full — export a backup!', 'error'); }
 }
 
-/* ---------- Navigation ---------- */
+/* ---------- Navigation (home / assignments / deep work / arena) ---------- */
+const TAB_INACTIVE = 'nav-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 text-textSecondary hover:text-textPrimary whitespace-nowrap transition-all duration-300';
 function switchTab(tab) {
-  ['home', 'assignments', 'focus'].forEach(t => {
-    $('page-' + t).classList.add('hidden');
-    $('tab-' + t).className = 'nav-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 text-textSecondary hover:text-textPrimary whitespace-nowrap transition-all duration-300';
+  TAB_IDS.forEach(t => {
+    const pg = $('page-' + t); if (pg) pg.classList.add('hidden');
+    const tb = $('tab-' + t); if (tb) tb.className = TAB_INACTIVE;
   });
-  $('page-' + tab).classList.remove('hidden');
-  const active = tab === 'focus' ? 'bg-neonViolet text-white shadow-lg shadow-neonViolet/20' : 'bg-neonCyan text-bgDark shadow-lg shadow-neonCyan/20';
-  $('tab-' + tab).className = 'nav-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 ' + active + ' whitespace-nowrap transition-all duration-300';
+  const pg = $('page-' + tab);
+  if (pg) pg.classList.remove('hidden');
+  const tb = $('tab-' + tab);
+  if (tb) {
+    const active = tab === 'focus' ? 'bg-neonViolet text-white shadow-lg shadow-neonViolet/20'
+      : tab === 'arena' ? 'bg-neonGreen text-bgDark shadow-lg shadow-neonGreen/20'
+      : 'bg-neonCyan text-bgDark shadow-lg shadow-neonCyan/20';
+    tb.className = 'nav-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 ' + active + ' whitespace-nowrap transition-all duration-300';
+  }
   document.body.classList.toggle('focus-dim', tab === 'focus');
   if (tab === 'focus') initDeepWorkWorkspace();
+  if (tab === 'arena' && typeof initArena === 'function') initArena();
 }
 function toggleModal(id) {
   $(id).classList.toggle('hidden');
