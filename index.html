@@ -110,6 +110,7 @@
       <button onclick="switchTab('home')" id="tab-home" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 bg-neonCyan text-bgDark transition-all duration-300"><i data-lucide="home" class="w-4 h-4"></i><span>Home</span></button>
       <button onclick="switchTab('assignments')" id="tab-assignments" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 text-textSecondary hover:text-textPrimary transition-all duration-300"><i data-lucide="layers" class="w-4 h-4"></i><span>Assignments</span></button>
       <button onclick="switchTab('focus')" id="tab-focus" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 text-textSecondary hover:text-textPrimary transition-all duration-300"><i data-lucide="crosshair" class="w-4 h-4"></i><span>Deep Work</span></button>
+      <button onclick="switchTab('arena')" id="tab-arena" class="nav-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 text-textSecondary hover:text-textPrimary transition-all duration-300"><i data-lucide="gamepad-2" class="w-4 h-4"></i><span>Arena</span></button>
     </nav>
     <div class="flex items-center gap-2">
       <button onclick="toggleCommandPalette()" class="p-2.5 rounded-xl bg-elevatedDark border border-white/10 text-textSecondary hover:text-neonCyan transition" title="Command Palette (Ctrl+K)" aria-label="Open command palette"><i data-lucide="command" class="w-5 h-5"></i></button>
@@ -282,6 +283,9 @@
       </div>
     </section>
 
+    <!-- ARENA PAGE (screens injected by js/arena-markup.js) -->
+    <section id="page-arena" class="hidden space-y-6"></section>
+
   </main>
 
   <script src="js/modals.js"></script>
@@ -290,5 +294,9 @@
   <script src="js/engine-render.js"></script>
   <script src="js/engine-ocr.js"></script>
   <script src="js/engine-fx.js"></script>
+  <script src="js/quiz-forge.js"></script>
+  <script src="js/arena-markup.js"></script>
+  <script src="js/arena-ui.js"></script>
+  <script src="js/arena-game.js"></script>
 </body>
 </html>
