@@ -34,7 +34,7 @@ body.cinema header{opacity:0;pointer-events:none}
 .h-logo b{color:var(--cy)}
 .h-school{font-size:9px;letter-spacing:.35em;color:var(--sub);margin-top:4px}
 .roles{display:flex;gap:26px}
-.role-btn{background:none;border:none;color:var(--sub);font-family:'Sora';font-size:10px;letter-spacing:.3em;cursor:pointer;padding:4px 0;border-bottom:1px solid transparent;transition:all .3s}
+.role-btn{background:none;border:none;color:var(--sub);font-family:'Space Grotesk';font-size:10px;letter-spacing:.3em;cursor:pointer;padding:4px 0;border-bottom:1px solid transparent;transition:all .3s}
 .role-btn:hover{color:var(--txt)}
 .role-btn.active{color:var(--cy);border-bottom-color:var(--cy)}
 /* UNIVERSE */
@@ -45,40 +45,49 @@ body.cinema #universe{transform:scale(1.5) translateY(4vh);opacity:.05;filter:bl
 .planet{position:absolute;left:0;top:0;border-radius:50%;cursor:pointer;transition:filter .35s}
 .planet:hover{filter:brightness(1.5)}
 .planet.active{filter:brightness(1.6)}
-.plabel{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:.3em;text-transform:uppercase;white-space:nowrap;text-shadow:0 2px 8px #000}
+.plabel{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%);font-family:'Space Grotesk';font-weight:500;font-size:9px;letter-spacing:.3em;text-transform:uppercase;white-space:nowrap;text-shadow:0 2px 8px #000}
 #core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;z-index:6}
 .core-orb{width:74px;height:74px;margin:0 auto;border-radius:50%;background:radial-gradient(circle at 35% 32%,#fff,var(--cy) 45%,#0a3b46 90%);box-shadow:0 0 60px rgba(0,229,255,.45),0 0 140px rgba(0,229,255,.18);animation:pulse 4s ease-in-out infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 60px rgba(0,229,255,.45),0 0 140px rgba(0,229,255,.18)}50%{box-shadow:0 0 80px rgba(0,229,255,.6),0 0 180px rgba(0,229,255,.25)}}
 #core-label{font-family:'Space Grotesk';font-size:13px;letter-spacing:.4em;margin-top:16px;font-weight:500}
-#core-sub{font-size:9px;letter-spacing:.25em;color:var(--sub);margin-top:5px;text-transform:uppercase}
+#core-sub{font-family:'Space Grotesk';font-weight:300;font-size:9px;letter-spacing:.25em;color:var(--sub);margin-top:5px;text-transform:uppercase}
 /* HINT + TICKER */
-#hint{position:fixed;bottom:44px;left:50%;transform:translateX(-50%);z-index:20;font-size:10px;letter-spacing:.4em;color:var(--sub);text-transform:uppercase;transition:opacity .5s;animation:hintpulse 2.6s ease-in-out infinite}
+#hint{position:fixed;bottom:44px;left:50%;transform:translateX(-50%);z-index:20;font-family:'Space Grotesk';font-size:10px;letter-spacing:.4em;color:var(--sub);text-transform:uppercase;transition:opacity .5s;animation:hintpulse 2.6s ease-in-out infinite}
 @keyframes hintpulse{0%,100%{opacity:.4}50%{opacity:.9}}
 body.cinema #hint{opacity:0}
 #ticker-wrap{position:fixed;bottom:0;left:0;right:0;padding:11px 0;border-top:1px solid rgba(255,255,255,.06);background:rgba(5,6,10,.72);backdrop-filter:blur(8px);overflow:hidden;z-index:20;transition:transform .9s cubic-bezier(.7,0,.3,1)}
 body.cinema #ticker-wrap{transform:translateY(110%)}
-#ticker{display:inline-block;white-space:nowrap;font-size:9px;letter-spacing:.3em;color:var(--sub);text-transform:uppercase;animation:tick 55s linear infinite}
+#ticker{display:inline-block;white-space:nowrap;font-family:'Space Grotesk';font-weight:300;font-size:9px;letter-spacing:.3em;color:var(--sub);text-transform:uppercase;animation:tick 55s linear infinite}
 @keyframes tick{from{transform:translateX(60vw)}to{transform:translateX(-110%)}}
-#stamp{position:fixed;bottom:38px;left:30px;z-index:19;font-size:8px;letter-spacing:.3em;color:var(--sub);transition:opacity .5s}
+#stamp{position:fixed;bottom:38px;left:30px;z-index:19;font-family:'Space Grotesk';font-weight:300;font-size:8px;letter-spacing:.3em;color:var(--sub);transition:opacity .5s}
 body.cinema #stamp{opacity:0}
 /* DETAIL */
-#detail{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .8s ease .25s;padding:0 20px}
+#detail{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s ease;padding:0 20px}
 #detail.show{opacity:1;pointer-events:auto}
+#detail .d-inner>*{opacity:0;transition:opacity .3s ease,transform .3s ease,filter .3s ease}
+#detail.show .d-inner>*{animation:dIn .75s cubic-bezier(.16,1,.3,1) both}
+#detail.show .d-inner>*:nth-child(1){animation-delay:.04s}
+#detail.show .d-inner>*:nth-child(2){animation-delay:.10s}
+#detail.show .d-inner>*:nth-child(3){animation-delay:.16s}
+#detail.show .d-inner>*:nth-child(4){animation-delay:.22s}
+#detail.show .d-inner>*:nth-child(5){animation-delay:.28s}
+#detail.show .d-inner>*:nth-child(6){animation-delay:.34s}
+@keyframes dIn{from{opacity:0;transform:translateY(26px);filter:blur(12px)}to{opacity:1;transform:none;filter:none}}
 .d-inner{width:min(600px,94vw);max-height:72vh;overflow-y:auto}
-.d-eyebrow{font-size:10px;letter-spacing:.5em;color:var(--cy);text-transform:uppercase;margin-bottom:18px}
+.d-eyebrow{font-family:'Space Grotesk';font-weight:500;font-size:10px;letter-spacing:.5em;color:var(--cy);text-transform:uppercase;margin-bottom:18px}
 #d-title{font-family:'Space Grotesk';font-weight:300;font-size:52px;letter-spacing:.12em;line-height:1.05;margin-bottom:10px}
-.d-meta{font-size:12px;color:var(--sub);letter-spacing:.15em;margin-bottom:22px;text-transform:uppercase}
+.d-meta{font-family:'Space Grotesk';font-weight:300;font-size:12px;color:var(--sub);letter-spacing:.2em;margin-bottom:22px;text-transform:uppercase}
 .d-chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px}
-.chip{font-size:9px;font-weight:700;letter-spacing:.2em;padding:6px 12px;border-radius:999px;border:1px solid;text-transform:uppercase}
+.chip{font-family:'Space Grotesk';font-weight:500;font-size:9px;letter-spacing:.2em;padding:6px 12px;border-radius:999px;border:1px solid;text-transform:uppercase}
 .chip.g{color:var(--cy);border-color:rgba(0,229,255,.35);background:rgba(0,229,255,.07)}
 .chip.ok{color:var(--gr);border-color:rgba(57,255,20,.3);background:rgba(57,255,20,.06)}
 .chip.p{color:var(--am);border-color:rgba(255,181,71,.35);background:rgba(255,181,71,.07)}
 .chip.d{color:var(--rd);border-color:rgba(255,77,94,.35);background:rgba(255,77,94,.07)}
 .d-rows{display:flex;flex-direction:column;gap:9px;margin-bottom:30px}
 .drow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 16px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.02);backdrop-filter:blur(6px)}
-.drow .t{font-size:12.5px;font-weight:600}
-.drow .s{font-size:10.5px;color:var(--sub);margin-top:3px;letter-spacing:.08em}
-#d-back{background:none;border:1px solid rgba(255,255,255,.2);color:var(--txt);font-family:'Sora';font-size:10px;letter-spacing:.35em;padding:13px 26px;border-radius:999px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+.drow .t{font-family:'Space Grotesk';font-weight:500;font-size:13px;letter-spacing:.04em}
+.drow .s{font-family:'Space Grotesk';font-weight:300;font-size:10px;color:var(--sub);margin-top:4px;letter-spacing:.18em;text-transform:uppercase}
+#d-back{background:none;border:1px solid rgba(255,255,255,.2);color:var(--txt);font-family:'Space Grotesk';font-weight:500;font-size:10px;letter-spacing:.35em;padding:13px 26px;border-radius:999px;cursor:pointer;transition:all .3s;text-transform:uppercase}
 #d-back:hover{border-color:var(--cy);color:var(--cy);box-shadow:0 0 24px rgba(0,229,255,.15)}
 @media(max-width:700px){#d-title{font-size:34px}.roles{gap:14px}.role-btn{font-size:8px;letter-spacing:.2em}#boot h1{font-size:40px}}
 </style>
@@ -208,7 +217,7 @@ function enterPlanet(p,ring,idx){
  document.body.classList.add('cinema');
  document.querySelectorAll('.planet').forEach(n=>n.classList.remove('active'));
  planets[idx].el.classList.add('active');
- setTimeout(()=>document.getElementById('detail').classList.add('show'),450);
+ setTimeout(()=>document.getElementById('detail').classList.add('show'),200);
 }
 function exitPlanet(){document.getElementById('detail').classList.remove('show');document.querySelectorAll('.planet.active').forEach(n=>n.classList.remove('active'));document.body.classList.remove('cinema');}
 function setRole(r){
