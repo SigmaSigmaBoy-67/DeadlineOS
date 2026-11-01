@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OrbitED — Every deadline, in orbit</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%2300E5FF'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--cy:#00E5FF;--vi:#A855F7;--gr:#39FF14;--am:#FFB547;--rd:#FF4D5E;--txt:#F5F7FF;--sub:#8B95A5}
+:root{--cy:#00E5FF;--vi:#A855F7;--gr:#39FF14;--am:#FFB547;--rd:#FF4D5E;--txt:#F5F7FF;--sub:#8B95A5;--line:rgba(255,255,255,.08)}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{background:#05060A;color:var(--txt);font-family:'Sora',sans-serif;overflow:hidden}
 #stars{position:fixed;inset:0;z-index:1}
 #grain{position:fixed;inset:0;z-index:12;pointer-events:none;opacity:.05;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="2"/></filter><rect width="120" height="120" filter="url(%23n)" opacity="0.55"/></svg>')}
 #vignette{position:fixed;inset:0;z-index:11;pointer-events:none;background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.62) 100%)}
-/* BOOT */
 #boot{position:fixed;inset:0;background:#05060A;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 1.2s ease;cursor:pointer}
 #boot.gone{opacity:0;pointer-events:none}
 .b-eye{font-size:10px;letter-spacing:.5em;color:var(--sub);text-transform:uppercase;animation:bfade 1.2s ease .2s both}
@@ -23,21 +23,22 @@ body{background:#05060A;color:var(--txt);font-family:'Sora',sans-serif;overflow:
 .b-line{font-size:11px;letter-spacing:.6em;color:var(--cy);text-transform:uppercase;animation:bfade 1.4s ease 1.1s both}
 .b-skip{position:absolute;bottom:30px;font-size:9px;letter-spacing:.3em;color:var(--sub)}
 @keyframes bfade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-/* LETTERBOX */
 .bar{position:fixed;left:0;right:0;height:0;background:#000;z-index:40;transition:height .9s cubic-bezier(.7,0,.3,1)}
 #bar-t{top:0}#bar-b{bottom:0}
 body.cinema .bar{height:11vh}
-/* HEADER */
-header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:22px 30px;transition:opacity .5s}
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:20px 30px;transition:opacity .5s;gap:14px;flex-wrap:wrap}
 body.cinema header{opacity:0;pointer-events:none}
 .h-logo{font-family:'Space Grotesk';font-size:15px;letter-spacing:.35em;font-weight:500}
 .h-logo b{color:var(--cy)}
 .h-school{font-size:9px;letter-spacing:.35em;color:var(--sub);margin-top:4px}
-.roles{display:flex;gap:26px}
+.h-right{display:flex;gap:26px;align-items:center}
+.roles{display:flex;gap:22px}
 .role-btn{background:none;border:none;color:var(--sub);font-family:'Space Grotesk';font-size:10px;letter-spacing:.3em;cursor:pointer;padding:4px 0;border-bottom:1px solid transparent;transition:all .3s}
 .role-btn:hover{color:var(--txt)}
 .role-btn.active{color:var(--cy);border-bottom-color:var(--cy)}
-/* UNIVERSE */
+.modes{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+.mode-btn{background:none;border:none;color:var(--sub);font-family:'Space Grotesk';font-size:9px;letter-spacing:.25em;padding:6px 13px;border-radius:999px;cursor:pointer;transition:all .3s}
+.mode-btn.active{background:rgba(0,229,255,.12);color:var(--cy)}
 #stage{position:fixed;inset:0;z-index:5}
 #universe{position:absolute;left:50%;top:50%;width:0;height:0;transition:transform 1.1s cubic-bezier(.7,0,.3,1),opacity .8s,filter .9s}
 body.cinema #universe{transform:scale(1.5) translateY(4vh);opacity:.05;filter:blur(8px)}
@@ -51,7 +52,6 @@ body.cinema #universe{transform:scale(1.5) translateY(4vh);opacity:.05;filter:bl
 @keyframes pulse{0%,100%{box-shadow:0 0 60px rgba(0,229,255,.45),0 0 140px rgba(0,229,255,.18)}50%{box-shadow:0 0 80px rgba(0,229,255,.6),0 0 180px rgba(0,229,255,.25)}}
 #core-label{font-family:'Space Grotesk';font-size:13px;letter-spacing:.4em;margin-top:16px;font-weight:500}
 #core-sub{font-family:'Space Grotesk';font-weight:300;font-size:9px;letter-spacing:.25em;color:var(--sub);margin-top:5px;text-transform:uppercase}
-/* HINT + TICKER */
 #hint{position:fixed;bottom:44px;left:50%;transform:translateX(-50%);z-index:20;font-family:'Space Grotesk';font-size:10px;letter-spacing:.4em;color:var(--sub);text-transform:uppercase;transition:opacity .5s;animation:hintpulse 2.6s ease-in-out infinite}
 @keyframes hintpulse{0%,100%{opacity:.4}50%{opacity:.9}}
 body.cinema #hint{opacity:0}
@@ -61,96 +61,154 @@ body.cinema #ticker-wrap{transform:translateY(110%)}
 @keyframes tick{from{transform:translateX(60vw)}to{transform:translateX(-110%)}}
 #stamp{position:fixed;bottom:38px;left:30px;z-index:19;font-family:'Space Grotesk';font-weight:300;font-size:8px;letter-spacing:.3em;color:var(--sub);transition:opacity .5s}
 body.cinema #stamp{opacity:0}
-/* DETAIL */
-#detail{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s ease;padding:0 20px}
-#detail.show{opacity:1;pointer-events:auto}
-#detail .d-inner>*{opacity:0;transition:opacity .3s ease,transform .3s ease,filter .3s ease}
-#detail.show .d-inner>*{animation:dIn .75s cubic-bezier(.16,1,.3,1) both}
-#detail.show .d-inner>*:nth-child(1){animation-delay:.04s}
-#detail.show .d-inner>*:nth-child(2){animation-delay:.10s}
-#detail.show .d-inner>*:nth-child(3){animation-delay:.16s}
-#detail.show .d-inner>*:nth-child(4){animation-delay:.22s}
-#detail.show .d-inner>*:nth-child(5){animation-delay:.28s}
-#detail.show .d-inner>*:nth-child(6){animation-delay:.34s}
-@keyframes dIn{from{opacity:0;transform:translateY(26px);filter:blur(12px)}to{opacity:1;transform:none;filter:none}}
-.d-inner{width:min(600px,94vw);max-height:72vh;overflow-y:auto}
-.d-eyebrow{font-family:'Space Grotesk';font-weight:500;font-size:10px;letter-spacing:.5em;color:var(--cy);text-transform:uppercase;margin-bottom:18px}
-#d-title{font-family:'Space Grotesk';font-weight:300;font-size:52px;letter-spacing:.12em;line-height:1.05;margin-bottom:10px}
-.d-meta{font-family:'Space Grotesk';font-weight:300;font-size:12px;color:var(--sub);letter-spacing:.2em;margin-bottom:22px;text-transform:uppercase}
-.d-chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px}
+#reset-btn{position:fixed;bottom:38px;right:30px;z-index:25;background:none;border:none;font-family:'Space Grotesk';font-size:8px;letter-spacing:.3em;color:var(--sub);cursor:pointer;transition:all .3s;text-transform:uppercase}
+#reset-btn:hover{color:var(--rd)}
+body.cinema #reset-btn{opacity:0;pointer-events:none}
+.comet{position:fixed;left:-160px;width:150px;height:3px;border-radius:3px;z-index:4;opacity:.85;transform:translateX(0) rotate(-6deg);transition:transform 2.6s linear;pointer-events:none}
+#toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);z-index:50;font-family:'Space Grotesk';font-size:10px;letter-spacing:.3em;color:var(--cy);text-transform:uppercase;padding:11px 22px;border:1px solid rgba(0,229,255,.3);border-radius:999px;background:rgba(5,6,10,.85);backdrop-filter:blur(8px);opacity:0;transition:opacity .4s;pointer-events:none}
+#toast.show{opacity:1}
+#closeup{position:fixed;inset:0;z-index:30;opacity:0;pointer-events:none;transition:opacity .4s ease}
+#closeup.show{opacity:1;pointer-events:auto}
+.cu-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:6vw;padding:0 5vw}
+.cu-sys{position:relative;width:320px;height:320px;flex-shrink:0;animation:sysIn 1s cubic-bezier(.16,1,.3,1) both}
+@keyframes sysIn{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:none}}
+.cu-planet{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:118px;height:118px;border-radius:50%}
+.moon{position:absolute;left:50%;top:50%;width:22px;height:22px;border-radius:50%;cursor:pointer;transition:filter .3s}
+.moon:hover{filter:brightness(1.6)}
+.mlabel{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);font-family:'Space Grotesk';font-size:7.5px;letter-spacing:.18em;white-space:nowrap;color:var(--sub);text-transform:uppercase}
+.cu-info{max-width:440px}
+#closeup.show .cu-info>*{animation:dIn .7s cubic-bezier(.16,1,.3,1) both}
+#closeup.show .cu-info>*:nth-child(1){animation-delay:.05s}
+#closeup.show .cu-info>*:nth-child(2){animation-delay:.11s}
+#closeup.show .cu-info>*:nth-child(3){animation-delay:.17s}
+#closeup.show .cu-info>*:nth-child(4){animation-delay:.23s}
+#closeup.show .cu-info>*:nth-child(5){animation-delay:.29s}
+#closeup.show .cu-info>*:nth-child(6){animation-delay:.35s}
+#closeup.show .cu-info>*:nth-child(7){animation-delay:.41s}
+@keyframes dIn{from{opacity:0;transform:translateY(20px);filter:blur(10px)}to{opacity:1;transform:none;filter:none}}
+.cu-eyebrow{font-family:'Space Grotesk';font-weight:500;font-size:10px;letter-spacing:.5em;color:var(--cy);text-transform:uppercase;margin-bottom:16px}
+.cu-title{font-family:'Space Grotesk';font-weight:300;font-size:44px;letter-spacing:.1em;line-height:1.08;margin-bottom:8px}
+.cu-meta{font-family:'Space Grotesk';font-weight:300;font-size:11px;color:var(--sub);letter-spacing:.2em;margin-bottom:18px;text-transform:uppercase}
+.cu-chips{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:20px}
 .chip{font-family:'Space Grotesk';font-weight:500;font-size:9px;letter-spacing:.2em;padding:6px 12px;border-radius:999px;border:1px solid;text-transform:uppercase}
 .chip.g{color:var(--cy);border-color:rgba(0,229,255,.35);background:rgba(0,229,255,.07)}
 .chip.ok{color:var(--gr);border-color:rgba(57,255,20,.3);background:rgba(57,255,20,.06)}
 .chip.p{color:var(--am);border-color:rgba(255,181,71,.35);background:rgba(255,181,71,.07)}
 .chip.d{color:var(--rd);border-color:rgba(255,77,94,.35);background:rgba(255,77,94,.07)}
-.d-rows{display:flex;flex-direction:column;gap:9px;margin-bottom:30px}
-.drow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 16px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.02);backdrop-filter:blur(6px)}
-.drow .t{font-family:'Space Grotesk';font-weight:500;font-size:13px;letter-spacing:.04em}
-.drow .s{font-family:'Space Grotesk';font-weight:300;font-size:10px;color:var(--sub);margin-top:4px;letter-spacing:.18em;text-transform:uppercase}
-#d-back{background:none;border:1px solid rgba(255,255,255,.2);color:var(--txt);font-family:'Space Grotesk';font-weight:500;font-size:10px;letter-spacing:.35em;padding:13px 26px;border-radius:999px;cursor:pointer;transition:all .3s;text-transform:uppercase}
-#d-back:hover{border-color:var(--cy);color:var(--cy);box-shadow:0 0 24px rgba(0,229,255,.15)}
-@media(max-width:700px){#d-title{font-size:34px}.roles{gap:14px}.role-btn{font-size:8px;letter-spacing:.2em}#boot h1{font-size:40px}}
+.cu-spark{margin-bottom:6px}
+.cu-spark .sl{font-family:'Space Grotesk';font-size:8px;letter-spacing:.35em;color:var(--sub);text-transform:uppercase;margin-bottom:8px}
+.acard{margin-top:16px;padding:16px 18px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.03);backdrop-filter:blur(8px)}
+.acard .at{font-family:'Space Grotesk';font-weight:500;font-size:14px;letter-spacing:.05em}
+.acard .as{font-family:'Space Grotesk';font-weight:300;font-size:10px;color:var(--sub);letter-spacing:.15em;text-transform:uppercase;margin-top:5px}
+.acard .act{margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.a-input{width:90px;background:#161C2A;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:9px 10px;font-family:'Space Grotesk';font-size:12px}
+.a-btn{background:linear-gradient(135deg,#00E5FF,#67e8f9);color:#05060A;border:none;padding:10px 16px;border-radius:10px;font-family:'Space Grotesk';font-weight:700;font-size:9.5px;letter-spacing:.2em;cursor:pointer}
+.a-btn.gr{background:linear-gradient(135deg,#39FF14,#86efac)}
+.cu-hintline{font-family:'Space Grotesk';font-weight:300;font-size:9px;letter-spacing:.3em;color:var(--sub);text-transform:uppercase;margin-top:20px}
+#cu-back{margin-top:14px;background:none;border:1px solid rgba(255,255,255,.2);color:var(--txt);font-family:'Space Grotesk';font-weight:500;font-size:10px;letter-spacing:.35em;padding:13px 26px;border-radius:999px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+#cu-back:hover{border-color:var(--cy);color:var(--cy);box-shadow:0 0 24px rgba(0,229,255,.15)}
+#classic{display:none;position:fixed;inset:0;z-index:15;background:#07090F;padding-top:76px}
+body.classic #classic{display:flex}
+body.classic #stage,body.classic #ticker-wrap,body.classic #hint,body.classic #stamp,body.classic .bar,body.classic #vignette{display:none}
+.c-side{width:212px;flex-shrink:0;border-right:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.c-nav-btn{display:flex;align-items:center;gap:10px;background:none;border:none;text-align:left;color:var(--sub);font-family:'Space Grotesk';font-weight:500;font-size:11px;letter-spacing:.2em;text-transform:uppercase;padding:11px 13px;border-radius:11px;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.c-nav-btn:hover{color:var(--txt);background:rgba(255,255,255,.04)}
+.c-nav-btn.active{color:var(--cy);background:rgba(0,229,255,.08);border-color:rgba(0,229,255,.22)}
+.c-nav-dot{width:7px;height:7px;border-radius:99px;background:currentColor;flex-shrink:0}
+.c-main{flex:1;overflow-y:auto;padding:18px 28px 40px}
+.c-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.c-kpi{background:#0D1119;border:1px solid var(--line);border-radius:16px;padding:16px}
+.c-kpi .l{font-family:'Space Grotesk';font-size:8.5px;letter-spacing:.25em;color:var(--sub);text-transform:uppercase}
+.c-kpi .v{font-family:'Space Grotesk';font-weight:700;font-size:24px;margin-top:6px}
+.c-kpi .v.cy{color:var(--cy)}.c-kpi .v.gr{color:var(--gr)}.c-kpi .v.am{color:var(--am)}.c-kpi .v.rd{color:var(--rd)}.c-kpi .v.vi{color:var(--vi)}
+.c-sec{margin-top:20px}
+.c-sec h3{font-family:'Space Grotesk';font-size:10px;letter-spacing:.3em;color:var(--sub);text-transform:uppercase;margin-bottom:12px}
+.c-card{background:#0D1119;border:1px solid var(--line);border-radius:16px;padding:16px}
+.c-list{display:flex;flex-direction:column;gap:8px}
+.c-row{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#0B0F17;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.c-row .t{font-size:12.5px;font-weight:600}
+.c-row .s{font-family:'Space Grotesk';font-size:9.5px;letter-spacing:.15em;color:var(--sub);text-transform:uppercase;margin-top:3px}
+.c-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.c-banner{height:40px;border-radius:10px;display:flex;align-items:center;padding:0 12px;font-family:'Space Grotesk';font-weight:700;font-size:10px;letter-spacing:.1em;color:#05060A;margin-bottom:10px}
+table.c-table{width:100%;border-collapse:collapse;font-size:12px}
+.c-table th{text-align:left;font-family:'Space Grotesk';font-size:9px;letter-spacing:.2em;color:var(--sub);text-transform:uppercase;padding:9px 10px;border-bottom:1px solid var(--line)}
+.c-table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.04)}
+.c-table tr:last-child td{border-bottom:none}
+.c-btn{background:rgba(255,181,71,.12);color:var(--am);border:1px solid rgba(255,181,71,.35);font-family:'Space Grotesk';font-weight:700;font-size:9px;letter-spacing:.2em;padding:7px 12px;border-radius:9px;cursor:pointer;text-transform:uppercase}
+.c-btn.sv{background:rgba(0,229,255,.12);color:var(--cy);border-color:rgba(0,229,255,.35)}
+.c-note{margin-top:26px;font-family:'Space Grotesk';font-weight:300;font-size:8.5px;letter-spacing:.3em;color:var(--sub);text-transform:uppercase}
+@media(max-width:760px){.cu-wrap{flex-direction:column;gap:10px;padding-top:12vh}.cu-sys{width:250px;height:250px;transform:scale(.8)}.cu-title{font-size:30px}.c-side{display:none}.roles{gap:12px}.role-btn{font-size:8px;letter-spacing:.15em}#boot h1{font-size:40px}.modes .mode-btn{font-size:8px;padding:5px 9px}}
 </style>
 </head>
 <body>
 <canvas id="stars"></canvas>
 <div id="grain"></div>
 <div id="vignette"></div>
-
 <div id="boot" onclick="this.classList.add('gone')">
   <div class="b-eye">Rise Institute presents</div>
   <h1>ORBIT<span>ED</span></h1>
   <div class="b-line">Every deadline, in orbit</div>
   <div class="b-skip">Click to skip</div>
 </div>
-
 <div id="bar-t" class="bar"></div>
 <div id="bar-b" class="bar"></div>
-
 <header>
   <div><div class="h-logo">ORBIT<b>ED</b></div><div class="h-school">RISE INSTITUTE · QUARTER 2</div></div>
-  <nav class="roles">
-    <button class="role-btn active" data-r="student" onclick="setRole('student')">STUDENT</button>
-    <button class="role-btn" data-r="teacher" onclick="setRole('teacher')">TEACHER</button>
-    <button class="role-btn" data-r="admin" onclick="setRole('admin')">ADMIN</button>
-  </nav>
+  <div class="h-right">
+    <nav class="roles">
+      <button class="role-btn active" data-r="student" onclick="setRole('student')">STUDENT</button>
+      <button class="role-btn" data-r="teacher" onclick="setRole('teacher')">TEACHER</button>
+      <button class="role-btn" data-r="admin" onclick="setRole('admin')">ADMIN</button>
+    </nav>
+    <div class="modes">
+      <button class="mode-btn active" id="mb-orbit" onclick="setMode('orbit')">ORBIT</button>
+      <button class="mode-btn" id="mb-classic" onclick="setMode('classic')">CLASSIC</button>
+    </div>
+  </div>
 </header>
-
 <div id="stage"><div id="universe">
   <div id="core"><div class="core-orb"></div><div id="core-label">YOU</div><div id="core-sub">Grade 8 · Quarter 2</div></div>
 </div></div>
-
-<div id="hint">Select a planet</div>
+<div id="hint">Select a planet — or press CLASSIC for the standard view</div>
 <div id="ticker-wrap"><div id="ticker"></div></div>
 <div id="stamp">ORBITED DEMO · SAMPLE DATA · BUILT BY SAMIR</div>
-
-<div id="detail">
-  <div class="d-inner">
-    <div class="d-eyebrow" id="d-eyebrow"></div>
-    <h2 id="d-title"></h2>
-    <div class="d-meta" id="d-meta"></div>
-    <div class="d-chips" id="d-chips"></div>
-    <div class="d-rows" id="d-rows"></div>
-    <button id="d-back" onclick="exitPlanet()">&#8592; Return to orbit</button>
+<button id="reset-btn" onclick="resetDemo()">Reset demo data</button>
+<div id="toast"></div>
+<div id="closeup">
+  <div class="cu-wrap">
+    <div class="cu-sys" id="cu-sys"></div>
+    <div class="cu-info">
+      <div class="cu-eyebrow" id="cu-eyebrow"></div>
+      <div class="cu-title" id="cu-title"></div>
+      <div class="cu-meta" id="cu-meta"></div>
+      <div class="cu-chips" id="cu-chips"></div>
+      <div class="cu-spark" id="cu-spark"></div>
+      <div class="acard" id="acard" style="display:none"></div>
+      <div class="cu-hintline" id="cu-hintline">Select a moon to open its assignment</div>
+      <button id="cu-back" onclick="exitPlanet()">&#8592; Return to orbit</button>
+    </div>
   </div>
 </div>
-
+<div id="classic">
+  <aside class="c-side" id="c-side"></aside>
+  <main class="c-main" id="c-main"></main>
+</div>
 <script>
 const DATA={
  student:{file:'Class file',core:['YOU','Grade 8 · Quarter 2'],
   ticker:['Due tomorrow — Unit 3 Performance Task · Math','Nov 3 — Research Log · English','Oct 31 — Weekly Readings · Science','Nov 5 — Islamic Studies Reflection'],
   planets:[
-   {name:'Mathematics',color:'#00E5FF',meta:'Mariam Mehdi · Period 3',chips:[['GRADE 89%','g'],['1 PENDING','p'],['5/6 SUBMITTED','ok']],
+   {name:'Mathematics',color:'#00E5FF',meta:'Mariam Mehdi · Period 3',hist:[80,83,85,87,89],chips:[['GRADE 89%','g'],['1 PENDING','p'],['5/6 SUBMITTED','ok']],
     rows:[['Unit 3 Performance Task','Due Nov 2','PENDING','p'],['Geometry Worksheet 4','Returned · 92/100','GRADED','ok'],['Fractions Set B','Due Oct 18','SUBMITTED','ok']]},
-   {name:'English',color:'#A855F7',meta:'Tehreem Fatima · Period 1',chips:[['GRADE 84%','g'],['3 PENDING','p'],['2/5 SUBMITTED','d']],
+   {name:'English',color:'#A855F7',meta:'Tehreem Fatima · Period 1',hist:[88,86,85,84,84],chips:[['GRADE 84%','g'],['3 PENDING','p'],['2/5 SUBMITTED','d']],
     rows:[['Research Log — Brochure','Due Nov 3','PENDING','p'],['Brochure Project','Due Nov 10','PENDING','p'],['Poetry Response','Returned · 88/100','GRADED','ok']]},
-   {name:'Science',color:'#39FF14',meta:'Ayesha Khan · Period 5',chips:[['GRADE 91%','g'],['1 DUE SOON','p'],['4/5 SUBMITTED','ok']],
+   {name:'Science',color:'#39FF14',meta:'Ayesha Khan · Period 5',hist:[85,88,90,91,91],chips:[['GRADE 91%','g'],['1 DUE SOON','p'],['4/5 SUBMITTED','ok']],
     rows:[['Weekly Readings — CK12','Due Oct 31','DUE TOMORROW','d'],['Lab Report — Cells','Returned · 95/100','GRADED','ok'],['Section Quiz 4','Due Oct 24','SUBMITTED','ok']]},
-   {name:'Islamic Studies',color:'#FFB547',meta:'Asma Baqri · Period 2',chips:[['GRADE 88%','g'],['ALL CAUGHT UP','ok']],
+   {name:'Islamic Studies',color:'#FFB547',meta:'Asma Baqri · Period 2',hist:[86,88,88,88,88],chips:[['GRADE 88%','g'],['ALL CAUGHT UP','ok']],
     rows:[['Reflection — Surah Al-Fil','Due Nov 5','PENDING','p'],['Pillars of Islam Quiz','Returned · 90/100','GRADED','ok']]},
-   {name:'Social Studies',color:'#FF4D5E',meta:'Omar Farooq · Period 4',chips:[['GRADE 82%','g'],['2 PENDING','p']],
+   {name:'Social Studies',color:'#FF4D5E',meta:'Omar Farooq · Period 4',hist:[84,83,82,82,82],chips:[['GRADE 82%','g'],['2 PENDING','p']],
     rows:[['Essay Outline — Civilizations','Due Nov 4','PENDING','p'],['Map Analysis Worksheet','Due Oct 29','SUBMITTED','ok']]},
-   {name:'Computer Science',color:'#60A5FA',meta:'Bilal Raza · Period 6',chips:[['GRADE 94%','g'],['ALL CAUGHT UP','ok']],
+   {name:'Computer Science',color:'#60A5FA',meta:'Bilal Raza · Period 6',hist:[90,92,93,94,94],chips:[['GRADE 94%','g'],['ALL CAUGHT UP','ok']],
     rows:[['Recursion Problem Set','Due Nov 7','PENDING','p'],['Loops Lab','Returned · 96/100','GRADED','ok']]}
   ]},
  teacher:{file:'Section file',core:['M. MEHDI','Teacher · Mathematics'],
@@ -178,12 +236,24 @@ const DATA={
     rows:[['Students enrolled','46','','g'],['Teachers','2','','g'],['Department average','90%','','ok'],['Overdue assignments','0','','ok']]}
   ]}
 };
-let role='student',planets=[],mx=0,my=0,t=0;
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let role='student',viewMode='orbit',scene='orbit',planets=[],moons=[],mx=0,my=0,t=0,selIdx=null,cur=null,cpage='dash',editKey=null;
+let S={};try{S=JSON.parse(localStorage.getItem('orbited-v3'))||{}}catch(e){S={}}
+if(!S.sub)S.sub={};if(!S.gr)S.gr={};
+function save(){localStorage.setItem('orbited-v3',JSON.stringify(S))}
+function resetDemo(){S={sub:{},gr:{}};save();toast('Demo data reset');renderClassic();if(scene==='closeup')buildMoons()}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200)}
+function eff(ri,ii){const r=DATA[role].planets[ri].rows[ii];const key=role+':'+ri+':'+ii;
+ if(role==='student'&&S.sub[key])return{t:r[0],s:r[1],x:'SUBMITTED',c:'ok'};
+ if(role==='teacher'&&S.gr[key])return{t:r[0],s:r[1],x:'GRADED · '+S.gr[key],c:'ok'};
+ return{t:r[0],s:r[1],x:r[2],c:r[3]}}
+function allRows(){const out=[];DATA[role].planets.forEach((p,ri)=>p.rows.forEach((r,ii)=>out.push({ri,ii,p,e:eff(ri,ii)})));return out}
+function counts(){const rows=allRows();return{pending:rows.filter(r=>r.e.c==='p'||r.e.c==='d').length,done:rows.filter(r=>r.e.c==='ok').length,total:rows.length}}
 const cv=document.getElementById('stars'),cx=cv.getContext('2d');let stars=[];
-function initStars(){cv.width=innerWidth;cv.height=innerHeight;stars=[];for(let i=0;i<230;i++)stars.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.3+.3,s:Math.random()*.06+.015,o:Math.random()*.65+.15});}
-function drawStars(){cx.clearRect(0,0,cv.width,cv.height);const g=cx;stars.forEach(s=>{s.y+=s.s;if(s.y>cv.height)s.y=0;g.globalAlpha=s.o;g.fillStyle='#9fb4d8';g.beginPath();g.arc(s.x+mx*22*(s.r),s.y,s.r,0,7);g.fill();});g.globalAlpha=1;}
-addEventListener('resize',()=>{initStars();buildUniverse();});
-addEventListener('mousemove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5;});
+function initStars(){cv.width=innerWidth;cv.height=innerHeight;stars=[];for(let i=0;i<230;i++)stars.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.3+.3,s:RM?0:Math.random()*.06+.015,o:Math.random()*.65+.15})}
+function drawStars(){cx.clearRect(0,0,cv.width,cv.height);stars.forEach(s=>{s.y+=s.s;if(s.y>cv.height)s.y=0;cx.globalAlpha=s.o;cx.fillStyle='#9fb4d8';cx.beginPath();cx.arc(s.x+(RM?0:mx*22*s.r),s.y,s.r,0,7);cx.fill()});cx.globalAlpha=1}
+addEventListener('resize',()=>{initStars();buildUniverse()});
+addEventListener('mousemove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
 function buildUniverse(){
  const u=document.getElementById('universe');
  u.querySelectorAll('.planet,.oring').forEach(n=>n.remove());
@@ -191,57 +261,198 @@ function buildUniverse(){
  document.getElementById('core-label').textContent=d.core[0];
  document.getElementById('core-sub').textContent=d.core[1];
  document.getElementById('ticker').textContent=d.ticker.join('   ·   ');
- const base=Math.min(innerWidth,innerHeight);
- const rings=[base*.17,base*.33];
- const made={};planets=d.planets.map((p,i)=>{
-  const ring=d.planets.length>3?i%2:0;const rad=rings[ring];
-  if(!made[ring]){made[ring]=1;const r=document.createElement('div');r.className='oring';r.style.width=r.style.height=rad*2+'px';u.appendChild(r);}
+ const base=Math.min(innerWidth,innerHeight),rings=[base*.17,base*.33],made={};
+ planets=d.planets.map((p,i)=>{
+  const ring=d.planets.length>3?i%2:0,rad=rings[ring];
+  if(!made[ring]){made[ring]=1;const r=document.createElement('div');r.className='oring';r.style.width=r.style.height=rad*2+'px';u.appendChild(r)}
   const el=document.createElement('div');el.className='planet';
   const size=(ring?52:40)+(i%3)*7;
   el.style.width=el.style.height=size+'px';
   el.style.background='radial-gradient(circle at 32% 30%,'+p.color+',#05060a 78%)';
   el.style.boxShadow='0 0 34px '+p.color+'44, inset -10px -12px 26px rgba(0,0,0,.85)';
   el.innerHTML='<div class="plabel" style="color:'+p.color+'">'+p.name+'</div>';
-  const idx=i;el.onclick=()=>enterPlanet(p,ring,idx);
+  el.onclick=()=>{selIdx=i;enterPlanet(i)};
   u.appendChild(el);
-  return{el,rad,ang:(i/d.planets.length)*Math.PI*2+ring*.5,speed:(ring?.0016:.0024)+i*.00018};
+  return{el,rad,ang:(i/d.planets.length)*Math.PI*2+ring*.5,speed:RM?0:(ring?.0016:.0024)+i*.00018}
  });
+ selIdx=null
 }
-function enterPlanet(p,ring,idx){
- const d=DATA[role];
- document.getElementById('d-eyebrow').textContent=d.file+' // '+String(idx+1).padStart(2,'0');
- document.getElementById('d-title').textContent=p.name;
- document.getElementById('d-meta').textContent=p.meta;
- document.getElementById('d-chips').innerHTML=p.chips.map(c=>'<span class="chip '+c[1]+'">'+c[0]+'</span>').join('');
- document.getElementById('d-rows').innerHTML=p.rows.map(r=>'<div class="drow"><div><div class="t">'+r[0]+'</div>'+(r[1]?'<div class="s">'+r[1]+'</div>':'')+'</div>'+(r[2]?'<span class="chip '+r[3]+'">'+r[2]+'</span>':'')+'</div>').join('');
+function enterPlanet(i){
+ cur={i,p:DATA[role].planets[i]};
+ const d=DATA[role],p=cur.p;
+ document.getElementById('cu-eyebrow').textContent=d.file+' // '+String(i+1).padStart(2,'0');
+ document.getElementById('cu-title').textContent=p.name;
+ document.getElementById('cu-meta').textContent=p.meta;
+ document.getElementById('cu-chips').innerHTML=p.chips.map(c=>'<span class="chip '+c[1]+'">'+c[0]+'</span>').join('');
+ const sp=document.getElementById('cu-spark');
+ if(role==='student'&&p.hist){sp.innerHTML='<div class="sl">Grade trajectory — this quarter</div>'+spark(p.hist,p.color)}else sp.innerHTML='';
+ document.getElementById('acard').style.display='none';
+ document.getElementById('cu-hintline').style.display=role==='admin'?'none':'block';
+ buildMoons();
  document.body.classList.add('cinema');
  document.querySelectorAll('.planet').forEach(n=>n.classList.remove('active'));
- planets[idx].el.classList.add('active');
- setTimeout(()=>document.getElementById('detail').classList.add('show'),200);
+ planets[i].el.classList.add('active');
+ scene='closeup';
+ setTimeout(()=>document.getElementById('closeup').classList.add('show'),180)
 }
-function exitPlanet(){document.getElementById('detail').classList.remove('show');document.querySelectorAll('.planet.active').forEach(n=>n.classList.remove('active'));document.body.classList.remove('cinema');}
+function buildMoons(){
+ const sys=document.getElementById('cu-sys');sys.innerHTML='';
+ const col=cur.p.color;
+ sys.innerHTML='<div class="cu-planet" style="background:radial-gradient(circle at 32% 30%,'+col+',#05060a 78%);box-shadow:0 0 60px '+col+'55, inset -14px -16px 32px rgba(0,0,0,.85)"></div>';
+ moons=cur.p.rows.map((r,ii)=>{
+  const e=eff(cur.i,ii);
+  const el=document.createElement('div');el.className='moon';
+  const mc={p:'#FFB547',d:'#FF4D5E',ok:'#39FF14',g:'#00E5FF'}[e.c];
+  el.style.background='radial-gradient(circle at 32% 30%,'+mc+',#05060a 78%)';
+  el.style.boxShadow='0 0 16px '+mc+'66';
+  const lb=e.t.length>16?e.t.slice(0,16)+'…':e.t;
+  el.innerHTML='<div class="mlabel">'+lb+'</div>';
+  el.onclick=()=>openMoon(ii);
+  sys.appendChild(el);
+  return{el,ang:ii/cur.p.rows.length*Math.PI*2-Math.PI/2,rad:112+(ii%2)*28,speed:RM?0:.003+ii*.0006}
+ })
+}
+function openMoon(ii){
+ const e=eff(cur.i,ii),key=role+':'+cur.i+':'+ii,ac=document.getElementById('acard');
+ let act='';
+ if(role==='student'&&(e.c==='p'||e.c==='d'))act='<div class="act"><button class="a-btn gr" onclick="markSub(\''+key+'\')">Mark as submitted</button></div>';
+ else if(role==='teacher'&&e.c==='p')act='<div class="act"><input class="a-input" id="gscore" type="number" min="0" max="100" placeholder="Score"> <button class="a-btn" onclick="saveGrade(\''+key+'\')">Save grade</button></div>';
+ else act='<div class="act"><span style="font-family:\'Space Grotesk\';font-size:9px;letter-spacing:.25em;color:var(--sub);text-transform:uppercase">No action needed</span></div>';
+ ac.innerHTML='<div class="at">'+e.t+'</div><div class="as">'+e.s+'</div><div style="margin-top:10px"><span class="chip '+e.c+'">'+e.x+'</span></div>'+act;
+ ac.style.display='block';
+ document.getElementById('cu-hintline').style.display='none';
+ ac.style.animation='none';void ac.offsetWidth;ac.style.animation='dIn .5s cubic-bezier(.16,1,.3,1) both'
+}
+function markSub(key){S.sub[key]=1;save();toast('Submitted — saved on this device');openMoon(Number(key.split(':')[2]));buildMoons();if(viewMode==='classic')renderClassic()}
+function saveGrade(key){const v=document.getElementById('gscore').value;if(v===''||Number(v)<0||Number(v)>100){toast('Enter a score 0–100');return}S.gr[key]=Number(v);save();toast('Graded '+v+'/100 — saved');openMoon(Number(key.split(':')[2]));buildMoons();if(viewMode==='classic')renderClassic()}
+function exitPlanet(){document.getElementById('closeup').classList.remove('show');document.querySelectorAll('.planet.active').forEach(n=>n.classList.remove('active'));document.body.classList.remove('cinema');scene='orbit'}
 function setRole(r){
  if(role===r)return;
- role=r;
+ role=r;editKey=null;
  document.querySelectorAll('.role-btn').forEach(b=>b.classList.toggle('active',b.dataset.r===r));
- if(document.body.classList.contains('cinema'))exitPlanet();
- const u=document.getElementById('universe');u.style.opacity=0;u.style.filter='blur(6px)';
- setTimeout(()=>{buildUniverse();u.style.opacity=1;u.style.filter='none';},420);
+ if(scene==='closeup')exitPlanet();
+ if(viewMode==='classic'){cpage='dash';renderClassic()}
+ else{const u=document.getElementById('universe');u.style.opacity=0;u.style.filter='blur(6px)';setTimeout(()=>{buildUniverse();u.style.opacity=1;u.style.filter='none'},420)}
 }
-addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('cinema'))exitPlanet();});
+function setMode(m){
+ viewMode=m;
+ document.getElementById('mb-orbit').classList.toggle('active',m==='orbit');
+ document.getElementById('mb-classic').classList.toggle('active',m==='classic');
+ document.body.classList.toggle('classic',m==='classic');
+ if(m==='classic'){if(scene==='closeup')exitPlanet();renderClassic()}
+}
+function spark(hist,color){
+ const w=230,h=50,pad=8,mn=Math.min(...hist),mxv=Math.max(...hist),rng=(mxv-mn)||1;
+ const pts=hist.map((v,i)=>[pad+i*(w-2*pad)/(hist.length-1),h-pad-((v-mn)/rng)*(h-2*pad)]);
+ const line=pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+ const dots=pts.map(p=>'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.6" fill="'+color+'"/>').join('');
+ return '<svg width="'+w+'" height="'+h+'" style="overflow:visible"><polyline points="'+line+'" fill="none" stroke="'+color+'" stroke-width="1.6" opacity=".9" style="filter:drop-shadow(0 0 5px '+color+')"/>'+dots+'</svg>'
+}
+function cometColor(){for(const p of DATA[role].planets){if(p.rows.some(r=>r[3]==='d'))return p.color}for(const p of DATA[role].planets){if(p.rows.some(r=>r[3]==='p'))return p.color}return'#00E5FF'}
+function spawnComet(){
+ if(RM||viewMode==='classic'||scene==='closeup')return;
+ const c=document.createElement('div');c.className='comet';const col=cometColor();
+ c.style.background='linear-gradient(90deg,transparent,'+col+')';
+ c.style.boxShadow='0 0 12px '+col;
+ c.style.top=(8+Math.random()*30)+'vh';
+ document.body.appendChild(c);
+ requestAnimationFrame(()=>{c.style.transform='translateX(120vw) rotate(-6deg)'});
+ setTimeout(()=>c.remove(),3200)
+}
+const CNAV={student:[['dash','Dashboard'],['classes','Classes'],['assignments','Assignments'],['grades','Grades']],teacher:[['dash','Dashboard'],['sections','Sections'],['grading','Grading']],admin:[['dash','Overview'],['depts','Departments']]};
+function renderClassic(){
+ const side=document.getElementById('c-side');
+ side.innerHTML=CNAV[role].map(n=>'<button class="c-nav-btn'+(cpage===n[0]?' active':'')+'" onclick="cgo(\''+n[0]+'\')"><span class="c-nav-dot"></span>'+n[1]+'</button>').join('');
+ const m=document.getElementById('c-main'),c=counts();
+ let h='';
+ const chipHtml=e=>'<span class="chip '+e.c+'">'+e.x+'</span>';
+ if(role==='student'){
+  if(cpage==='dash'){
+   h+='<div class="c-kpis"><div class="c-kpi"><div class="l">Classes</div><div class="v cy">'+DATA.student.planets.length+'</div></div><div class="c-kpi"><div class="l">Pending</div><div class="v am">'+c.pending+'</div></div><div class="c-kpi"><div class="l">Submitted</div><div class="v gr">'+c.done+'</div></div><div class="c-kpi"><div class="l">Average</div><div class="v vi">86.4%</div></div></div>';
+   h+='<div class="c-sec"><h3>Due soon</h3><div class="c-list">';
+   allRows().filter(r=>r.e.c==='p'||r.e.c==='d').forEach(r=>{h+='<div class="c-row"><div><div class="t">'+r.e.t+'</div><div class="s">'+r.p.name+' · '+r.e.s+'</div></div>'+chipHtml(r.e)+'</div>'});
+   h+='</div></div><div class="c-sec"><h3>My classes</h3><div class="c-grid">';
+   DATA.student.planets.forEach(p=>{h+='<div class="c-card"><div class="c-banner" style="background:'+p.color+'">'+p.name.toUpperCase()+'</div><div class="s" style="color:var(--sub);font-size:11px">'+p.meta+'</div></div>'});
+   h+='</div></div>';
+  }
+  if(cpage==='classes'){
+   h+='<div class="c-grid">';
+   DATA.student.planets.forEach(p=>{h+='<div class="c-card"><div class="c-banner" style="background:'+p.color+'">'+p.name.toUpperCase()+'</div><div class="s" style="color:var(--sub);font-size:11px">'+p.meta+'</div><div style="margin-top:10px">'+p.chips.map(x=>'<span class="chip '+x[1]+'">'+x[0]+'</span>').join(' ')+'</div></div>'});
+   h+='</div>';
+  }
+  if(cpage==='assignments'){
+   h+='<div class="c-card"><table class="c-table"><tr><th>Assignment</th><th>Class</th><th>Due / detail</th><th>Status</th></tr>';
+   allRows().forEach(r=>{h+='<tr><td>'+r.e.t+'</td><td>'+r.p.name+'</td><td style="color:var(--sub)">'+r.e.s+'</td><td>'+chipHtml(r.e)+'</td></tr>'});
+   h+='</table></div>';
+  }
+  if(cpage==='grades'){
+   h+='<div class="c-card"><table class="c-table"><tr><th>Class</th><th>Teacher</th><th>Grade</th><th>Trajectory</th></tr>';
+   DATA.student.planets.forEach(p=>{h+='<tr><td>'+p.name+'</td><td style="color:var(--sub)">'+p.meta.split(' · ')[0]+'</td><td><b style="color:'+p.color+'">'+p.chips[0][0].replace('GRADE ','')+'</b></td><td>'+spark(p.hist,p.color)+'</td></tr>'});
+   h+='</table></div>';
+  }
+ }
+ if(role==='teacher'){
+  if(cpage==='dash'){
+   h+='<div class="c-kpis"><div class="c-kpi"><div class="l">Sections</div><div class="v cy">'+DATA.teacher.planets.length+'</div></div><div class="c-kpi"><div class="l">To grade</div><div class="v am">'+c.pending+'</div></div><div class="c-kpi"><div class="l">Settled</div><div class="v gr">'+c.done+'</div></div><div class="c-kpi"><div class="l">Flagged</div><div class="v rd">'+allRows().filter(r=>r.e.c==='d').length+'</div></div></div>';
+   h+='<div class="c-sec"><h3>Needs grading</h3><div class="c-list">';
+   allRows().filter(r=>r.e.c==='p'||r.e.c==='d').forEach(r=>{h+='<div class="c-row"><div><div class="t">'+r.e.t+'</div><div class="s">'+r.p.name+' · '+r.e.s+'</div></div>'+chipHtml(r.e)+'</div>'});
+   h+='</div></div>';
+  }
+  if(cpage==='sections'){
+   h+='<div class="c-grid">';
+   DATA.teacher.planets.forEach(p=>{h+='<div class="c-card"><div class="c-banner" style="background:'+p.color+'">'+p.name.toUpperCase()+'</div><div class="s" style="color:var(--sub);font-size:11px">'+p.meta+'</div><div style="margin-top:10px">'+p.chips.map(x=>'<span class="chip '+x[1]+'">'+x[0]+'</span>').join(' ')+'</div></div>'});
+   h+='</div>';
+  }
+  if(cpage==='grading'){
+   h+='<div class="c-card"><table class="c-table"><tr><th>Assignment</th><th>Section</th><th>Status</th><th>Action</th></tr>';
+   allRows().forEach(r=>{const key=role+':'+r.ri+':'+r.ii;
+    let act='';
+    if(r.e.c==='p'){act=editKey===key?'<input class="a-input" id="g-'+r.ri+'-'+r.ii+'" type="number" min="0" max="100" placeholder="Score" style="width:80px"> <button class="c-btn sv" onclick="cgSave(\''+key+'\')">Save</button>':'<button class="c-btn" onclick="cgEdit(\''+key+'\')">Grade</button>'}
+    h+='<tr><td>'+r.e.t+'</td><td>'+r.p.name+'</td><td>'+chipHtml(r.e)+'</td><td>'+act+'</td></tr>'});
+   h+='</table></div>';
+  }
+ }
+ if(role==='admin'){
+  if(cpage==='dash'){
+   h+='<div class="c-kpis"><div class="c-kpi"><div class="l">Departments</div><div class="v cy">'+DATA.admin.planets.length+'</div></div><div class="c-kpi"><div class="l">Students</div><div class="v vi">'+DATA.admin.planets.reduce((a,p)=>a+Number(p.rows[0][1]),0)+'</div></div><div class="c-kpi"><div class="l">Overdue items</div><div class="v rd">'+DATA.admin.planets.reduce((a,p)=>a+Number((p.rows[3][1].split(' ')[0])||0),0)+'</div></div><div class="c-kpi"><div class="l">Logins today</div><div class="v gr">367</div></div></div>';
+   h+='<div class="c-sec"><h3>Department pulse</h3><div class="c-list">';
+   DATA.admin.planets.forEach(p=>{h+='<div class="c-row"><div><div class="t">'+p.name+'</div><div class="s">'+p.meta+'</div></div><div>'+p.chips.map(x=>'<span class="chip '+x[1]+'">'+x[0]+'</span>').join(' ')+'</div></div>'});
+   h+='</div></div>';
+  }
+  if(cpage==='depts'){
+   h+='<div class="c-grid">';
+   DATA.admin.planets.forEach(p=>{h+='<div class="c-card"><div class="c-banner" style="background:'+p.color+'">'+p.name.toUpperCase()+'</div><div class="c-list" style="gap:5px">'+p.rows.map(r=>'<div class="c-row" style="padding:8px 10px"><div class="s" style="margin:0">'+r[0]+'</div><b style="font-family:\'Space Grotesk\';font-size:12px">'+r[1]+'</b></div>').join('')+'</div></div>'});
+   h+='</div>';
+  }
+ }
+ h+='<div class="c-note">OrbitED demo · sample data · changes saved on this device · built by Samir</div>';
+ m.innerHTML=h
+}
+function cgo(p){cpage=p;editKey=null;renderClassic()}
+function cgEdit(key){editKey=key;renderClassic();const inp=document.getElementById('g-'+key.split(':')[1]+'-'+key.split(':')[2]);if(inp)inp.focus()}
+function cgSave(key){const el=document.getElementById('g-'+key.split(':')[1]+'-'+key.split(':')[2]);if(!el||el.value===''||Number(el.value)<0||Number(el.value)>100){toast('Enter a score 0–100');return}S.gr[key]=Number(el.value);save();editKey=null;toast('Graded '+el.value+'/100 — saved');renderClassic()}
+addEventListener('keydown',e=>{
+ if(viewMode==='classic')return;
+ if(e.key==='Escape'&&scene==='closeup'){exitPlanet();return}
+ if(scene!=='orbit'||!planets.length)return;
+ if(e.key==='ArrowRight'||e.key==='ArrowLeft'){
+  e.preventDefault();
+  selIdx=selIdx===null?(e.key==='ArrowRight'?0:planets.length-1):(selIdx+(e.key==='ArrowRight'?1:-1)+planets.length)%planets.length;
+  planets.forEach((p,i)=>p.el.classList.toggle('active',i===selIdx))
+ }
+ if(e.key==='Enter'&&selIdx!==null)enterPlanet(selIdx)
+});
 function loop(){
  t+=.01;
- planets.forEach((p,i)=>{
-  p.ang+=p.speed;
-  const w=Math.sin(t+i)*2.5;
-  const x=Math.cos(p.ang)*p.rad+mx*18;
-  const y=Math.sin(p.ang)*p.rad*.72+my*12+w;
-  p.el.style.transform='translate(-50%,-50%) translate('+x+'px,'+y+'px)';
- });
- drawStars();requestAnimationFrame(loop);
+ if(viewMode==='orbit'){
+  if(scene==='orbit')planets.forEach((p,i)=>{p.ang+=p.speed;const w=RM?0:Math.sin(t+i)*2.5,x=Math.cos(p.ang)*p.rad+(RM?0:mx*18),y=Math.sin(p.ang)*p.rad*.72+(RM?0:my*12)+w;p.el.style.transform='translate(-50%,-50%) translate('+x+'px,'+y+'px)'});
+  if(scene==='closeup')moons.forEach(m=>{m.ang+=m.speed;const x=Math.cos(m.ang)*m.rad,y=Math.sin(m.ang)*m.rad*.72;m.el.style.transform='translate(-50%,-50%) translate('+x+'px,'+y+'px)'})
+ }
+ drawStars();requestAnimationFrame(loop)
 }
-initStars();buildUniverse();loop();
-setTimeout(()=>document.getElementById('boot').classList.add('gone'),2800);
+initStars();buildUniverse();renderClassic();loop();
+setTimeout(()=>document.getElementById('boot').classList.add('gone'),RM?1200:2800);
+setTimeout(spawnComet,6000);setInterval(spawnComet,15000);
 </script>
 </body>
 </html>
