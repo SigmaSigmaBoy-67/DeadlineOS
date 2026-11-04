@@ -16,6 +16,12 @@ if (mount) {
     if (root || loading) return
     loading = true
     try {
+      // The terrain is decorative; let the HTML and navigation paint first.
+      await new Promise<void>(resolve => {
+        if ('requestIdleCallback' in window) window.requestIdleCallback(() => resolve(), { timeout: 1200 })
+        else setTimeout(resolve, 150)
+      })
+      if (motion.matches || !desktop.matches) return
       const { GLSLHills } = await import('@/components/ui/glsl-hills')
       if (!motion.matches && desktop.matches && !root) {
         root = createRoot(mount)

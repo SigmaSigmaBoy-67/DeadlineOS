@@ -1374,17 +1374,12 @@ h3 {
 .js-motion .reveal {
   transform: translateY(7px);
   transition: transform 0.55s var(--ease);
+  transition-delay: calc(var(--i, 0) * 55ms);
 }
-.js-motion .reveal.in-view {
-  opacity: 1;
-  transform: none;
-}
-.js-motion .reveal.delay-1 {
-  transition-delay: 0.08s;
-}
-.js-motion .reveal.delay-2 {
-  transition-delay: 0.16s;
-}
+.js-motion .reveal.in-view { transform: none; }
+.js-motion .reveal.in-view.no-anim { transition: none; }
+.js-motion .reveal.delay-1 { --i: 1; }
+.js-motion .reveal.delay-2 { --i: 2; }
 @keyframes hero-breathe {
   from {
     transform: translate(-5%, 3%) scale(0.96);
@@ -1765,9 +1760,9 @@ h3 {
   transform: skewX(-25deg);
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.23), transparent);
   pointer-events: none;
-  transition: left .55s ease;
+  transition: transform .55s ease;
 }
-@media (hover: hover) { .btn:hover::after { left: 125%; } }
+@media (hover: hover) { .btn:hover::after { transform: translateX(513%) skewX(-25deg); } }
 .event-card { position: relative; overflow: hidden; border-color: rgba(255,255,255,.95); }
 .event-date {
   flex: none;
@@ -1782,9 +1777,9 @@ h3 {
   transform: skewX(-22deg);
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.27), transparent);
   pointer-events: none;
-  transition: left .75s ease;
+  transition: transform .75s ease;
 }
-@media (hover: hover) { .event-card:hover::after { left: 115%; } }
+@media (hover: hover) { .event-card:hover::after { transform: translateX(620%) skewX(-22deg); } }
 .feature-card { position: relative; border-radius: 23px; }
 .feature-card:nth-child(2) { border-top: 2px solid rgba(213,179,111,.53); }
 .program-tile { border-radius: 22px; }
@@ -1855,3 +1850,32 @@ h3 {
 .about-aside .surface-panel { padding: 28px; }
 .about-aside .surface-panel > .icon { margin-bottom: 12px; }
 .program-tile .link { margin-top: 14px; }
+
+/* Motion refinements: pause the decorative glow outside the viewport. */
+.home-hero.is-paused::before, .page-hero.is-paused::before { animation-play-state: paused; }
+/* No cross-document view transitions: native navigation must not wipe or
+   duplicate the sticky header, especially when returning via history. */
+.home-hero h1, .page-hero h1 { animation: hero-enter .65s var(--ease) both; }
+.home-hero .hero-copy > p, .page-hero .wrap > p { animation: hero-enter .65s .08s var(--ease) both; }
+@keyframes hero-enter { from { opacity: .72; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+/* Static geometric cue instead of an infinite decorative animation. */
+.eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  vertical-align: -1px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 20 12 30 16 20 20 16 30 12 20 2 16 12 12Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 20 12 30 16 20 20 16 30 12 20 2 16 12 12Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.btn:active { transform: translateY(0) scale(.98); }
+.form-box input:focus-visible, .form-box select:focus-visible, .form-box textarea:focus-visible {
+  box-shadow: 0 0 0 4px rgba(53,108,85,.14);
+}
+.btn.is-copied::before { content: "\2713"; font-weight: 700; }
+@media (hover: hover) {
+  .donate-option .icon { transition: transform .25s ease; }
+  .donate-option:hover .icon { transform: scale(1.07); }
+}

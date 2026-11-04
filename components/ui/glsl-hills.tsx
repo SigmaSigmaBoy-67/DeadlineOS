@@ -166,6 +166,8 @@ export function GLSLHills({ width = '100%', height = '100%', cameraZ = 125, plan
     document.addEventListener('visibilitychange', onVisibility)
     const onContextLost = (event: Event) => { event.preventDefault(); stop() }
     canvas.addEventListener('webglcontextlost', onContextLost)
+    const onContextRestored = () => { resize(); start() }
+    canvas.addEventListener('webglcontextrestored', onContextRestored)
 
     return () => {
       stop()
@@ -173,6 +175,7 @@ export function GLSLHills({ width = '100%', height = '100%', cameraZ = 125, plan
       resizeObserver.disconnect()
       document.removeEventListener('visibilitychange', onVisibility)
       canvas.removeEventListener('webglcontextlost', onContextLost)
+      canvas.removeEventListener('webglcontextrestored', onContextRestored)
       scene.remove(plane)
       geometry.dispose()
       material.dispose()

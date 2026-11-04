@@ -111,8 +111,6 @@ export function LiquidNavbar({
   const navRef = React.useRef<HTMLElement>(null);
   const indicatorRef = React.useRef<HTMLSpanElement>(null);
   const itemRefs = React.useRef<(HTMLElement | null)[]>([]);
-  const previous = React.useRef(current);
-  const stretchTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [ready, setReady] = React.useState(false);
 
   const measure = React.useCallback(() => {
@@ -133,17 +131,20 @@ export function LiquidNavbar({
     setReady(true);
   }, [current]);
 
-  React.useLayoutEffect(() => {
-    measure();
-    if (previous.current !== current && navRef.current?.dataset.ready === "true") {
-      navRef.current.dataset.stretch = "true";
-      if (stretchTimer.current) clearTimeout(stretchTimer.current);
-      stretchTimer.current = setTimeout(() => {
-        if (navRef.current) navRef.current.dataset.stretch = "false";
-      }, 190);
-    }
-    previous.current = current;
-  }, [current, measure]);
+  React.useLayoutEffect(() => { measure(); }, [measure]);
+
+  // First measurement must paint before enabling transitions, or the drop can
+  // visibly slide from the left edge on load. No timer or hydration-state race.
+  React.useEffect(() => {
+    if (!ready) return;
+    let second = 0;
+    const first = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() => {
+        if (navRef.current) navRef.current.dataset.motion = "true";
+      });
+    });
+    return () => { cancelAnimationFrame(first); cancelAnimationFrame(second); };
+  }, [ready]);
 
   React.useEffect(() => {
     const nav = navRef.current;
@@ -164,7 +165,6 @@ export function LiquidNavbar({
       window.removeEventListener("resize", schedule);
       document.fonts?.removeEventListener?.("loadingdone", schedule);
       cancelAnimationFrame(frame);
-      if (stretchTimer.current) clearTimeout(stretchTimer.current);
     };
   }, [items, measure]);
 
