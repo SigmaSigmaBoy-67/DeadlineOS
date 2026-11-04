@@ -97,7 +97,7 @@ precision highp float;
 varying vec3 vPosition;
 void main() {
   float opacity = clamp((150.0 - length(vPosition)) / 170.0, 0.0, 0.7);
-  gl_FragColor = vec4(vec3(0.78, 0.84, 0.74), opacity);
+  gl_FragColor = vec4(vec3(0.22, 0.70, 0.28), opacity);
 }`
 
 export function GLSLHills({ width = '100%', height = '100%', cameraZ = 125, planeSize = 256, speed = 0.5 }: GLSLHillsProps) {

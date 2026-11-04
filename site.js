@@ -11,12 +11,29 @@
       frame = 0;
       header.classList.toggle('is-scrolled', window.scrollY > 24);
       header.classList.toggle('on-dark', !!hero && hero.getBoundingClientRect().bottom > header.offsetHeight / 2);
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      document.documentElement.style.setProperty('--scroll-progress', String(scrollable > 0 ? window.scrollY / scrollable : 0));
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(syncHeader); };
     syncHeader();
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule, { passive: true });
     window.addEventListener('pageshow', schedule);
+  }
+
+  // A pointer-following light is purely decorative and only updates on mouse
+  // movement; touch and reduced-motion devices keep the static background.
+  if (!reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    let lightFrame = 0;
+    window.addEventListener('pointermove', event => {
+      const x = event.clientX, y = event.clientY;
+      if (lightFrame) return;
+      lightFrame = requestAnimationFrame(() => {
+        lightFrame = 0;
+        document.documentElement.style.setProperty('--cursor-x', `${x}px`);
+        document.documentElement.style.setProperty('--cursor-y', `${y}px`);
+      });
+    }, { passive: true });
   }
 
   // CSS glow runs only while its hero is visible. No observer in older browsers.
