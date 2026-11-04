@@ -3,8 +3,8 @@
 /**
  * Nimbus UI · Liquid Navbar — "Waterline"
  * Adapted for the Jaffery Center site from the component supplied by the user.
- * Water uses a small WebGL shader; the active drop has a CSS fallback.
- * Original design credit: guglielmogiannattasio.it
+ * A single measured CSS capsule replaces the former shader/drop pair.
+ * Original supplied component design credit: guglielmogiannattasio.it
  */
 import * as React from "react";
 
@@ -20,6 +20,7 @@ export type LiquidNavItem = {
   label: string;
   href?: string;
   icon?: React.ReactNode;
+  /** Deprecated visual cue from the original demo; links remain visually stable. */
   fx?: NimbusFx;
 };
 export type LiquidNavbarProps = {
@@ -29,9 +30,6 @@ export type LiquidNavbarProps = {
   onChange?: (index: number, item: LiquidNavItem) => void;
   tone?: "light" | "dark";
   compact?: boolean;
-  sound?: boolean;
-  /** Opt in to WebGL; the CSS water drop is the reliable default. */
-  webgl?: boolean;
   className?: string;
   style?: React.CSSProperties;
 };
@@ -92,91 +90,12 @@ export const NimbusIcons = {
   ),
 };
 const DEFAULT_ITEMS: LiquidNavItem[] = [
-  { label: "Home", icon: NimbusIcons.home, fx: "glow" },
-  { label: "Explore", icon: NimbusIcons.globe, fx: "spin" },
-  { label: "Flights", icon: NimbusIcons.plane, fx: "plane" },
-  { label: "Weather", icon: NimbusIcons.drop, fx: "drop" },
-  { label: "Profile", icon: NimbusIcons.user, fx: "wave" },
+  { label: "Home", icon: NimbusIcons.home },
+  { label: "Explore", icon: NimbusIcons.globe },
+  { label: "Profile", icon: NimbusIcons.user },
 ];
-const PAD = 12;
 
-const VERT = `attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}`;
-const FRAG = `precision highp float;
-uniform vec2 uRes;uniform float uDpr;uniform float uTime;uniform vec4 uPill;uniform vec4 uBlob;uniform vec4 uRipple;uniform float uDark;
-float capsule(vec2 p,vec2 c,float halfWidth,float radius){p-=c;p.x=max(abs(p.x)-halfWidth,0.);return length(p)-radius;}
-void main(){
- vec2 p=vec2(gl_FragCoord.x,uRes.y*uDpr-gl_FragCoord.y)/uDpr;
- vec2 size=uPill.zw; vec2 q=abs(p-(uPill.xy+size*.5))-size*.5+size.y*.5;
- float pill=length(max(q,0.))+min(max(q.x,q.y),0.)-size.y*.5;
- float d=capsule(p,uBlob.xy,uBlob.z,uBlob.w);
- float pulse=sin(length(p-uRipple.xy)*.19-uRipple.z*22.)*exp(-abs(length(p-uRipple.xy)-uRipple.z*135.)*.045)*uRipple.w;
- float edge=1.-smoothstep(-1.5,1.5,d+pulse*2.);
- float inside=1.-smoothstep(-1.,1.,pill);
- float rim=exp(-abs(d)*.38)*.22;
- float caustic=sin(p.x*.17+p.y*.11+uTime*1.8)*sin(p.x*.08-p.y*.16-uTime)*.045;
- vec3 col=mix(vec3(.33,.67,.53),vec3(.75,.96,.86),clamp((p.y-uBlob.y)/(-uBlob.w*2.)+.5,0.,1.));
- if(uDark>.5)col=mix(col,vec3(.7,.9,.86),.6);
- float alpha=inside*clamp(edge*(.54+caustic)+rim,0.,.85);
- gl_FragColor=vec4(col*alpha,alpha);
-}`;
-
-type GLState = {
-  gl: WebGLRenderingContext;
-  uniforms: Record<string, WebGLUniformLocation | null>;
-};
-function initGL(canvas: HTMLCanvasElement): GLState | null {
-  let gl: WebGLRenderingContext | null = null;
-  try {
-    gl = canvas.getContext("webgl", {
-      alpha: true,
-      premultipliedAlpha: true,
-      antialias: false,
-    });
-  } catch {
-    return null;
-  }
-  if (!gl) return null;
-  const compile = (type: number, src: string) => {
-    const shader = gl.createShader(type);
-    if (!shader) return null;
-    gl.shaderSource(shader, src);
-    gl.compileShader(shader);
-    return gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? shader : null;
-  };
-  const vs = compile(gl.VERTEX_SHADER, VERT),
-    fs = compile(gl.FRAGMENT_SHADER, FRAG);
-  if (!vs || !fs) return null;
-  const program = gl.createProgram();
-  if (!program) return null;
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return null;
-  gl.useProgram(program);
-  const buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array([-1, -1, 3, -1, -1, 3]),
-    gl.STATIC_DRAW,
-  );
-  const attr = gl.getAttribLocation(program, "a");
-  gl.enableVertexAttribArray(attr);
-  gl.vertexAttribPointer(attr, 2, gl.FLOAT, false, 0, 0);
-  const uniforms: Record<string, WebGLUniformLocation | null> = {};
-  for (const name of [
-    "uRes",
-    "uDpr",
-    "uTime",
-    "uPill",
-    "uBlob",
-    "uRipple",
-    "uDark",
-  ])
-    uniforms[name] = gl.getUniformLocation(program, name);
-  return { gl, uniforms };
-}
-
+/** URL/controlled active index is authoritative. The capsule is purely decorative. */
 export function LiquidNavbar({
   items = DEFAULT_ITEMS,
   defaultActive = 0,
@@ -184,285 +103,70 @@ export function LiquidNavbar({
   onChange,
   tone = "light",
   compact = false,
-  sound = false,
-  webgl = false,
   className,
   style,
 }: LiquidNavbarProps) {
   const [inner, setInner] = React.useState(defaultActive);
   const current = Math.max(0, Math.min(items.length - 1, active ?? inner));
-  const [glMode, setGlMode] = React.useState<"on" | "off">("off");
-  const [fx, setFx] = React.useState({ index: -1, count: 0 });
   const navRef = React.useRef<HTMLElement>(null);
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const dropRef = React.useRef<HTMLSpanElement>(null);
+  const indicatorRef = React.useRef<HTMLSpanElement>(null);
   const itemRefs = React.useRef<(HTMLElement | null)[]>([]);
-  const audioRef = React.useRef<AudioContext | null>(null);
-  const wakeRef = React.useRef<() => void>(() => {});
-  const state = React.useRef({
-    x: 0,
-    velocity: 0,
-    target: 0,
-    half: 20,
-    radius: 21,
-    y: 0,
-    width: 0,
-    height: 0,
-    rippleX: 0,
-    rippleY: 0,
-    rippleAge: 10,
-    visible: true,
-    reduced: false,
-    raf: 0,
-    last: 0,
-    gl: null as GLState | null,
-  });
+  const previous = React.useRef(current);
+  const stretchTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [ready, setReady] = React.useState(false);
 
   const measure = React.useCallback(() => {
-    const nav = navRef.current,
-      el = itemRefs.current[current];
-    if (!nav || !el) return;
-    const s = state.current;
-    s.width = nav.offsetWidth;
-    s.height = nav.offsetHeight;
-    s.target = PAD + el.offsetLeft + el.offsetWidth / 2;
-    s.y = PAD + el.offsetTop + el.offsetHeight / 2;
-    s.half = Math.max(0, (el.offsetWidth - el.offsetHeight) / 2);
-    s.radius = el.offsetHeight / 2;
-    if (!s.x) s.x = s.target;
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = Math.round((s.width + PAD * 2) * dpr),
-        h = Math.round((s.height + PAD * 2) * dpr);
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-        canvas.style.width = `${s.width + PAD * 2}px`;
-        canvas.style.height = `${s.height + PAD * 2}px`;
-      }
-    }
+    const nav = navRef.current;
+    const item = itemRefs.current[current];
+    const indicator = indicatorRef.current;
+    if (!nav || !item || !indicator) return;
+    // DOMRects are measured in the same coordinate space; offsetLeft would
+    // silently break if an offset parent or font/layout changed.
+    const box = nav.getBoundingClientRect();
+    const target = item.getBoundingClientRect();
+    if (!box.width || !target.width) return;
+    const x = target.left - box.left;
+    indicator.style.width = `${target.width}px`;
+    indicator.style.height = `${target.height}px`;
+    indicator.style.top = `${target.top - box.top}px`;
+    indicator.style.transform = `translate3d(${x}px, 0, 0)`;
+    setReady(true);
   }, [current]);
 
   React.useLayoutEffect(() => {
     measure();
-    // Native page navigation stays instant. Only the indicator animates from
-    // the previously selected item after the next page has already loaded.
-    try {
-      const stored = sessionStorage.getItem("liquid-nav-from");
-      sessionStorage.removeItem("liquid-nav-from");
-      const from = stored === null ? -1 : Number(stored);
-      const previous = itemRefs.current[from];
-      if (
-        Number.isInteger(from) &&
-        from >= 0 &&
-        from !== current &&
-        previous &&
-        !window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ) {
-        state.current.x = PAD + previous.offsetLeft + previous.offsetWidth / 2;
-        state.current.velocity = 0;
-        state.current.rippleAge = 0;
-      }
-    } catch {
-      /* Storage can be unavailable in private browsing. */
+    if (previous.current !== current && navRef.current?.dataset.ready === "true") {
+      navRef.current.dataset.stretch = "true";
+      if (stretchTimer.current) clearTimeout(stretchTimer.current);
+      stretchTimer.current = setTimeout(() => {
+        if (navRef.current) navRef.current.dataset.stretch = "false";
+      }, 190);
     }
-  }, [measure, compact, items.length, current]);
+    previous.current = current;
+  }, [current, measure]);
+
   React.useEffect(() => {
-    const s = state.current,
-      canvas = canvasRef.current;
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    s.reduced = motionQuery.matches;
-    s.visible =
-      !!navRef.current?.getBoundingClientRect().width &&
-      document.visibilityState === "visible";
-    s.gl = webgl && !s.reduced && s.visible && canvas ? initGL(canvas) : null;
-    setGlMode(s.gl ? "on" : "off");
-    const lost = (event: Event) => {
-      event.preventDefault();
-      s.gl = null;
-      setGlMode("off");
+    const nav = navRef.current;
+    if (!nav) return;
+    let frame = 0;
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
     };
-    canvas?.addEventListener("webglcontextlost", lost);
-
-    const frame = (time: number) => {
-      s.raf = 0;
-      if (!s.visible) return;
-      const dt = Math.min((time - (s.last || time)) / 1000, 0.035);
-      s.last = time;
-      if (s.reduced) {
-        s.x = s.target;
-        s.velocity = 0;
-      } else {
-        s.velocity += (s.target - s.x) * 190 * dt;
-        s.velocity *= Math.exp(-20 * dt);
-        s.x += s.velocity * dt;
-      }
-      s.rippleAge += dt;
-      if (dropRef.current) {
-        dropRef.current.style.width = `${s.half * 2 + s.radius * 2}px`;
-        dropRef.current.style.transform = `translateX(${s.x - s.half - s.radius - PAD}px) scaleX(${1 + Math.min(Math.abs(s.velocity) / 1600, 0.16)})`;
-      }
-      if (s.gl) {
-        const { gl, uniforms: u } = s.gl;
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-        gl.uniform2f(u.uRes, s.width + PAD * 2, s.height + PAD * 2);
-        gl.uniform1f(u.uDpr, dpr);
-        gl.uniform1f(u.uTime, time / 1000);
-        gl.uniform4f(u.uPill, PAD, PAD, s.width, s.height);
-        gl.uniform4f(u.uBlob, s.x, s.y, s.half, s.radius);
-        gl.uniform4f(
-          u.uRipple,
-          s.rippleX,
-          s.rippleY,
-          s.rippleAge,
-          Math.max(0, 1 - s.rippleAge),
-        );
-        gl.uniform1f(u.uDark, tone === "dark" ? 1 : 0);
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
-      }
-      // Static glass needs no continuous animation. Stop once the spring and
-      // ripple settle; restart only after interaction, resize, or visibility.
-      const moving =
-        Math.abs(s.target - s.x) > 0.25 || Math.abs(s.velocity) > 2;
-      if (!s.reduced && (moving || s.rippleAge < 1.1))
-        s.raf = requestAnimationFrame(frame);
-    };
-    const wake = () => {
-      if (s.visible && !s.raf) {
-        s.last = performance.now();
-        s.raf = requestAnimationFrame(frame);
-      }
-    };
-    wakeRef.current = wake;
-    const maybeInit = () => {
-      measure();
-      if (
-        webgl &&
-        !s.reduced &&
-        s.visible &&
-        !s.gl &&
-        canvas &&
-        navRef.current?.offsetWidth
-      ) {
-        s.gl = initGL(canvas);
-        setGlMode(s.gl ? "on" : "off");
-      }
-      wake();
-    };
-    const resize =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(maybeInit)
-        : null;
-    if (resize && navRef.current) resize.observe(navRef.current);
-    else window.addEventListener("resize", maybeInit);
-    const observer =
-      typeof IntersectionObserver !== "undefined"
-        ? new IntersectionObserver(([entry]) => {
-            s.visible =
-              entry.isIntersecting && document.visibilityState === "visible";
-            if (s.visible) maybeInit();
-            else {
-              cancelAnimationFrame(s.raf);
-              s.raf = 0;
-            }
-          })
-        : null;
-    if (observer && navRef.current) observer.observe(navRef.current);
-    const visibility = () => {
-      s.visible =
-        document.visibilityState === "visible" && !!navRef.current?.offsetWidth;
-      if (s.visible) maybeInit();
-      else {
-        cancelAnimationFrame(s.raf);
-        s.raf = 0;
-      }
-    };
-    const restored = () => {
-      s.gl = null;
-      maybeInit();
-    };
-    const motionChanged = () => {
-      s.reduced = motionQuery.matches;
-      if (s.reduced) {
-        cancelAnimationFrame(s.raf);
-        s.raf = 0;
-        s.gl = null;
-        setGlMode("off");
-        wake();
-      } else maybeInit();
-    };
-    document.addEventListener("visibilitychange", visibility);
-    canvas?.addEventListener("webglcontextrestored", restored);
-    motionQuery.addEventListener("change", motionChanged);
-    wake();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
+    observer?.observe(nav);
+    itemRefs.current.forEach(item => { if (item) observer?.observe(item); });
+    window.addEventListener("resize", schedule, { passive: true });
+    document.fonts?.addEventListener?.("loadingdone", schedule);
+    void document.fonts?.ready.then(schedule);
     return () => {
-      cancelAnimationFrame(s.raf);
-      s.raf = 0;
       observer?.disconnect();
-      resize?.disconnect();
-      if (!resize) window.removeEventListener("resize", maybeInit);
-      canvas?.removeEventListener("webglcontextlost", lost);
-      canvas?.removeEventListener("webglcontextrestored", restored);
-      motionQuery.removeEventListener("change", motionChanged);
-      document.removeEventListener("visibilitychange", visibility);
-      wakeRef.current = () => {};
-      audioRef.current?.close().catch(() => {});
-      audioRef.current = null;
+      window.removeEventListener("resize", schedule);
+      document.fonts?.removeEventListener?.("loadingdone", schedule);
+      cancelAnimationFrame(frame);
+      if (stretchTimer.current) clearTimeout(stretchTimer.current);
     };
-  }, [measure, tone, webgl]);
-
-  const select = (index: number) => {
-    const s = state.current;
-    const el = itemRefs.current[index];
-    if (el) {
-      s.rippleX = PAD + el.offsetLeft + el.offsetWidth / 2;
-      s.rippleY = s.y;
-      s.rippleAge = 0;
-    }
-    setFx((prev) => ({ index, count: prev.count + 1 }));
-    wakeRef.current();
-    if (sound) {
-      try {
-        const ctx = (audioRef.current ||= new AudioContext());
-        const oscillator = ctx.createOscillator(),
-          gain = ctx.createGain(),
-          now = ctx.currentTime;
-        oscillator.frequency.setValueAtTime(440, now);
-        oscillator.frequency.exponentialRampToValueAtTime(900, now + 0.09);
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
-        oscillator.connect(gain).connect(ctx.destination);
-        oscillator.start(now);
-        oscillator.stop(now + 0.17);
-      } catch {
-        /* audio is optional */
-      }
-    }
-    if (index !== current) {
-      if (items[index]?.href) {
-        try {
-          sessionStorage.setItem("liquid-nav-from", String(current));
-        } catch {
-          /* Optional polish only. */
-        }
-      }
-      if (active === undefined) setInner(index);
-      onChange?.(index, items[index]);
-    }
-  };
-  const onKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-    event.preventDefault();
-    const next =
-      (current + (event.key === "ArrowRight" ? 1 : -1) + items.length) %
-      items.length;
-    select(next);
-    itemRefs.current[next]?.focus();
-  };
+  }, [items, measure]);
 
   return (
     <nav
@@ -470,61 +174,47 @@ export function LiquidNavbar({
       className={["nimbus-nav", className].filter(Boolean).join(" ")}
       style={style}
       data-tone={tone}
-      data-gl={glMode}
       data-compact={String(compact)}
+      data-ready={String(ready)}
       aria-label="Main navigation"
-      onKeyDown={onKeyDown}
-      onPointerDown={(event) => {
-        const rect = navRef.current?.getBoundingClientRect();
-        if (rect) {
-          state.current.rippleX = event.clientX - rect.left + PAD;
-          state.current.rippleY = event.clientY - rect.top + PAD;
-          state.current.rippleAge = 0;
-          wakeRef.current();
-        }
+      onKeyDown={event => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        const focused = itemRefs.current.findIndex(item => item === document.activeElement);
+        const from = focused < 0 ? current : focused;
+        const next = (from + (event.key === "ArrowRight" ? 1 : -1) + items.length) % items.length;
+        itemRefs.current[next]?.focus(); // Focus is not selection: links navigate on activation only.
       }}
     >
       <span className="nimbus-glass" aria-hidden="true" />
-      <canvas className="nimbus-water" ref={canvasRef} aria-hidden="true" />
-      <span className="nimbus-drop" ref={dropRef} aria-hidden="true" />
+      <span className="nimbus-drop" ref={indicatorRef} aria-hidden="true" />
       {items.map((item, index) => {
-        const content = (
-          <>
-            {item.icon && (
-              <span
-                className="nv-ico"
-                key={fx.index === index ? fx.count : 0}
-                data-fx={
-                  fx.index === index && item.fx !== "none"
-                    ? (item.fx ?? "pop")
-                    : undefined
-                }
-              >
-                {item.icon}
-              </span>
-            )}
-            <span className="nimbus-label">{item.label}</span>
-          </>
-        );
+        const content = <>
+          {item.icon && <span className="nv-ico" aria-hidden="true">{item.icon}</span>}
+          <span className="nimbus-label">{item.label}</span>
+        </>;
         const props = {
           className: "nimbus-item",
           "aria-current": index === current ? ("page" as const) : undefined,
-          "aria-label": item.label,
-          title: item.label,
-          onClick: () => select(index),
-          ref: (node: HTMLElement | null) => {
-            itemRefs.current[index] = node;
+          onClick: () => {
+            if (index !== current && items[index].href) {
+              // Begin the glide immediately while the browser follows the link.
+              // No artificial navigation delay or stale state on the next page.
+              const nav = navRef.current?.getBoundingClientRect();
+              const target = itemRefs.current[index]?.getBoundingClientRect();
+              const indicator = indicatorRef.current;
+              if (nav && target && indicator) {
+                indicator.style.width = `${target.width}px`;
+                indicator.style.transform = `translate3d(${target.left - nav.left}px, 0, 0)`;
+              }
+            }
+            if (active === undefined) setInner(index);
+            if (index !== current) onChange?.(index, items[index]);
           },
+          ref: (node: HTMLElement | null) => { itemRefs.current[index] = node; },
         };
-        return item.href ? (
-          <a key={`${item.label}-${index}`} {...props} href={item.href}>
-            {content}
-          </a>
-        ) : (
-          <button key={`${item.label}-${index}`} {...props} type="button">
-            {content}
-          </button>
-        );
+        return item.href ? <a key={item.href} {...props} href={item.href}>{content}</a>
+          : <button key={item.label} {...props} type="button">{content}</button>;
       })}
     </nav>
   );

@@ -38,11 +38,10 @@ export function SiteNavigation({ activeIndex }: { activeIndex: number }) {
     };
     const onResize = () => {
       if (window.innerWidth > 1020) {
+        const focusWasInMenu = panelRef.current?.contains(document.activeElement);
         setOpen(false);
-        requestAnimationFrame(() =>
-          rootRef.current
-            ?.querySelector<HTMLElement>('.nimbus-item[aria-current="page"]')
-            ?.focus(),
+        if (focusWasInMenu) requestAnimationFrame(() =>
+          rootRef.current?.querySelector<HTMLElement>('.nimbus-item[aria-current="page"]')?.focus(),
         );
       }
     };
@@ -65,8 +64,6 @@ export function SiteNavigation({ activeIndex }: { activeIndex: number }) {
           defaultActive={activeIndex}
           active={activeIndex}
           tone="light"
-          sound={false}
-          webgl={true}
         />
       </div>
       <div className="mobile-navigation">
@@ -100,7 +97,10 @@ export function SiteNavigation({ activeIndex }: { activeIndex: number }) {
               key={item.label}
               href={item.href}
               aria-current={index === activeIndex ? "page" : undefined}
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false);
+                if (index === activeIndex) buttonRef.current?.focus();
+              }}
             >
               <span className="mobile-link-icon" aria-hidden="true">
                 {item.icon}

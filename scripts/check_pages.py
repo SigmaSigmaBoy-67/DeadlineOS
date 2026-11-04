@@ -13,6 +13,7 @@ class Page(HTMLParser):
         self.links = []
         self.active = []
         self.images = []
+        self.favicons = []
         self.navs = []
         self.filters = set()
         self.categories = set()
@@ -28,6 +29,8 @@ class Page(HTMLParser):
                 self.active.append(href)
         if tag == 'img':
             self.images.append(attrs.get('src', ''))
+        if tag == 'link' and attrs.get('rel') == 'icon':
+            self.favicons.append(attrs.get('href', ''))
         if tag == 'nav':
             self.navs.append(attrs.get('aria-label'))
         if 'data-filter' in attrs:
@@ -51,7 +54,10 @@ for name in PAGES:
             assert href[1:] in page.ids, (name, href)
         elif href.endswith('.html'):
             assert (ROOT / href).is_file(), (name, href)
-    for image in page.images:
+    assert page.favicons == ['assets/brand/favicon.svg'], name
+    assert page.images.count('assets/brand/mihrab-color.svg') == 1, name
+    assert page.images.count('assets/brand/mihrab-reverse.svg') == 1, name
+    for image in (*page.images, *page.favicons):
         assert (ROOT / image).is_file(), (name, image)
     if name == 'programs':
         assert page.filters == {'all', 'faith', 'learning', 'community'}
