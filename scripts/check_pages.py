@@ -42,6 +42,7 @@ for name in PAGES:
     page = Page()
     page.feed(text)
     assert 'main' in page.ids and 'liquid-nav-root' in page.ids, name
+    assert 'hero-hills-root' in page.ids and '/src/hills-entry.tsx' in text, name
     assert page.navs.count('Main navigation') == 1 and page.navs.count('Mobile navigation') == 1, name
     assert page.active == [f'{name}.html', f'{name}.html'], (name, page.active)
     assert 'New River' not in text, name
