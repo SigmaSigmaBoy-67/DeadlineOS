@@ -69,6 +69,7 @@ for name in PAGES:
     assert page.navs.count('Main navigation') == 1 and page.navs.count('Mobile navigation') == 1, name
     assert page.active == [f'{name}.html', f'{name}.html'], (name, page.active)
     assert 'New River' not in text, name
+    assert 'paypal.com' not in text.lower() and 'hosted_button_id' not in text.lower(), name
     for href in page.links:
         if href.startswith('#'):
             assert href[1:] in page.ids, (name, href)

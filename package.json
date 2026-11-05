@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "python3 build.py && vite --host 0.0.0.0",
     "build": "python3 build.py && vite build",
+    "build:vercel": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "test": "python3 scripts/check_pages.py"
